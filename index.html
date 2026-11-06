@@ -22,58 +22,60 @@
   <h1 onclick="goHome()">가성비 쇼핑 큐레이션</h1>
   <p class="sub">엄선한 가성비 꿀템과 최저가 할인 정보를 모아드립니다.</p>
   <hr />
-  <div id="app">블로그 글을 불러오는 중...</div>
+  <div id="app">글을 불러오는 중...</div>
 
   <script>
-    // 수동으로 관리하는 블로그 포스트 파일 목록 (CMS로 발행한 파일명을 여기에 추가하거나 자동 로드)
-    // 현재 저장소에 있는 마크다운 파일들입니다.
     const postFiles = [
-      { name: "post.md", title: "2026년 추천 가성비 로봇청소기 TOP 3" },
-      { name: "가성비-밀키트-탑-3.md", title: "가성비 밀키트 탑 3" }
+      { name: "post.md", path: "./post.md", title: "2026년 추천 가성비 로봇청소기 TOP 3" },
+      { name: "가성비-밀키트-탑-3.md", path: "./posts/가성비-밀키트-탑-3.md", altPath: "./가성비-밀키트-탑-3.md", title: "가성비 밀키트 탑 3" }
     ];
 
-    async function renderList() {
+    function renderList() {
       const app = document.getElementById('app');
       let html = '';
-      
-      for (const post of postFiles) {
+      postFiles.forEach((post, index) => {
         html += `
-          <div class="post-card" onclick="viewPost('${post.name}', '${post.title}')">
+          <div class="post-card" onclick="viewPost(${index})">
             <div class="post-title">${post.title}</div>
             <div class="post-date">발행 완료</div>
           </div>
         `;
-      }
+      });
       app.innerHTML = html;
     }
 
-    async function viewPost(fileName, title) {
+    async function viewPost(index) {
       const app = document.getElementById('app');
+      const post = postFiles[index];
       app.innerHTML = '<p style="text-align:center;">본문을 불러오는 중...</p>';
       
+      let text = '';
       try {
-        // 상대 경로로 직접 마크다운 파일을 불러옵니다 (API 제한 없음)
-        const res = await fetch('./' + fileName);
-        if (!res.ok) throw new Error('파일을 찾을 수 없습니다.');
-        const text = await res.text();
-        
-        // Frontmatter 메타데이터 제거 후 마크다운 본문 파싱
-        const parts = text.split('---');
-        const markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : text;
-        const htmlContent = marked.parse(markdownBody);
-
-        app.innerHTML = `
-          <a class="back-btn" onclick="goHome()">&larr; 목록으로 돌아가기</a>
-          <h2 style="margin-top:0; margin-bottom:20px;">${title}</h2>
-          <div id="content-area">${htmlContent}</div>
-        `;
-        window.scrollTo(0, 0);
+        let res = await fetch(post.path);
+        if (!res.ok && post.altPath) {
+          res = await fetch(post.altPath);
+        }
+        if (!res.ok) throw new Error('파일 없음');
+        text = await res.text();
       } catch (e) {
         app.innerHTML = `
           <a class="back-btn" onclick="goHome()">&larr; 목록으로 돌아가기</a>
-          <p style="text-align:center; color:red;">본문을 불러오지 못했습니다. 파일 위치를 확인해주세요.</p>
+          <p style="text-align:center; color:red;">본문을 불러오지 못했습니다.</p>
         `;
+        return;
       }
+
+      // Frontmatter 제거 및 마크다운 본문 출력
+      const parts = text.split('---');
+      const markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : text;
+      const htmlContent = marked.parse(markdownBody);
+
+      app.innerHTML = `
+        <a class="back-btn" onclick="goHome()">&larr; 목록으로 돌아가기</a>
+        <h2 style="margin-top:0; margin-bottom:20px;">${post.title}</h2>
+        <div id="content-area">${htmlContent}</div>
+      `;
+      window.scrollTo(0, 0);
     }
 
     function goHome() {
