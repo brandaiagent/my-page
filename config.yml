@@ -2,8 +2,6 @@ backend:
   name: github
   repo: brandaiagent/my-page
   branch: main
-  auth_type: implicit
-  token: "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"
 
 media_folder: "images"
 public_folder: "/images"
