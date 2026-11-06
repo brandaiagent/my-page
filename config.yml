@@ -1,0 +1,19 @@
+backend:
+  name: github
+  repo: brandaiagent/my-page
+  branch: main
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+  - name: "blog"
+    label: "쇼핑 포스팅"
+    folder: "posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "제목", name: "title", widget: "string" }
+      - { label: "발행일", name: "date", widget: "datetime" }
+      - { label: "썸네일 이미지", name: "image", widget: "image", required: false }
+      - { label: "본문 내용", name: "body", widget: "markdown" }
