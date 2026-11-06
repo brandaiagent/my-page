@@ -1,15 +1,15 @@
 backend:
   name: github
-  repo: brandaiagent/my-page
+  repo: brandaiagent/my-page  # <- 반드시 본인 계정명/저장소명이어야 합니다!
   branch: main
 
-media_folder: "images" # 글 작성 시 올리는 이미지 저장 위치
+media_folder: "images"
 public_folder: "/images"
 
 collections:
   - name: "blog"
     label: "쇼핑 포스팅"
-    folder: "posts" # 글이 저장될 폴더
+    folder: "posts"
     create: true
     slug: "{{slug}}"
     fields:
