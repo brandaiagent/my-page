@@ -2,6 +2,7 @@ backend:
   name: github
   repo: brandaiagent/my-page
   branch: main
+  site_domain: my-page-hazel-phi.vercel.app
 
 media_folder: "images"
 public_folder: "/images"
