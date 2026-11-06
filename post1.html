@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가성비 쇼핑 에이전트</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #2563eb; text-decoration: none; font-weight: bold; }
+        h1 { border-bottom: 2px solid #2563eb; padding-bottom: 10px; color: #1e293b; }
+        h2 { color: #1e40af; margin-top: 30px; }
+        blockquote { background: #f1f5f9; border-left: 4px solid #2563eb; margin: 20px 0; padding: 10px 15px; }
+        a { display: inline-block; background: #2563eb; color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; }
+        a:hover { background: #1d4ed8; }
+        img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← 목록으로 돌아가기</a>
+    <div id="content">글을 불러오는 중입니다...</div>
+
+    <script>
+        // post1.md 파일 내용을 읽어서 보여줍니다
+        fetch('post1.md')
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('content').innerHTML = marked.parse(text);
+            })
+            .catch(err => {
+                document.getElementById('content').innerHTML = '<p>글을 불러오지 못했습니다.</p>';
+            });
+    </script>
+</body>
+</html>
