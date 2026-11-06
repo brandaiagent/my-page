@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: brandaiagent/my-page  # <- 반드시 본인 계정명/저장소명이어야 합니다!
+  repo: brandaiagent/my-page
   branch: main
 
 media_folder: "images"
