@@ -15,7 +15,9 @@
     .post-date { font-size: 0.85rem; color: #888; }
     hr { border: none; border-top: 2px solid #2563eb; margin-bottom: 40px; }
     .back-btn { display: inline-block; margin-bottom: 20px; color: #2563eb; text-decoration: none; font-weight: bold; cursor: pointer; }
-    #content-area img { max-width: 100%; height: auto; border-radius: 8px; }
+    
+    /* 이미지 깨짐 방지 및 반응형 스타일 */
+    #content-area img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 20px auto; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
@@ -65,9 +67,15 @@
         return;
       }
 
-      // Frontmatter 제거 및 마크다운 본문 출력
+      // Frontmatter 메타데이터 제거
       const parts = text.split('---');
-      const markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : text;
+      let markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : text;
+
+      // [핵심] 마크다운 내부의 이미지 경로(예: images/파일명 또는 /images/파일명)를 웹사이트가 정확히 찾도록 보정
+      markdownBody = markdownBody.replace(/src=["']?images\//g, 'src="./images/')
+                                 .replace(/\]\(\s*images\//g, '](./images/')
+                                 .replace(/\]\(\s*\/images\//g, '](./images/');
+
       const htmlContent = marked.parse(markdownBody);
 
       app.innerHTML = `
