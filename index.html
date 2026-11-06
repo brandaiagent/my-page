@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 구글 서치콘솔 메타태그도 유지됩니다 -->
     <title>가성비 쇼핑 에이전트</title>
-    <!-- 마크다운 변환 라이브러리 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333; }
-        h1 { border-bottom: 2px solid #2563eb; padding-bottom: 10px; color: #1e293b; }
-        h2 { color: #1e40af; margin-top: 30px; }
-        blockquote { background: #f1f5f9; border-left: 4px solid #2563eb; margin: 20px 0; padding: 10px 15px; }
-        a { display: inline-block; background: #2563eb; color: white; padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: bold; margin: 10px 0; }
-        a:hover { background: #1d4ed8; }
-        img { max-width: 100%; border-radius: 8px; margin: 15px 0; }
+        body { font-family: 'Noto Sans KR', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; }
+        header { text-align: center; padding: 30px 0; border-bottom: 2px solid #2563eb; margin-bottom: 30px; }
+        h1 { margin: 0; color: #1e293b; font-size: 1.8rem; }
+        p.subtitle { color: #64748b; margin-top: 8px; font-size: 0.95rem; }
+        
+        .post-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 16px; transition: transform 0.2s, box-shadow 0.2s; background: #fff; }
+        .post-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .post-title { font-size: 1.25rem; margin: 0 0 10px 0; }
+        .post-title a { color: #1e293b; text-decoration: none; font-weight: bold; }
+        .post-title a:hover { color: #2563eb; }
+        .post-date { font-size: 0.8rem; color: #94a3b8; }
     </style>
 </head>
 <body>
-    <div id="content">글을 불러오는 중입니다...</div>
+    <header>
+        <h1>가성비 쇼핑 큐레이션</h1>
+        <p class="subtitle">엄선한 가성비 꿀템과 최저가 할인 정보를 모아드립니다.</p>
+    </header>
 
-    <script>
-        // post.md 파일의 마크다운 글을 가져와서 화면에 출력
-        fetch('post.md')
-            .then(response => response.text())
-            .then(text => {
-                document.getElementById('content').innerHTML = marked.parse(text);
-            })
-            .catch(err => {
-                document.getElementById('content').innerHTML = '<p>글을 불러오지 못했습니다.</p>';
-            });
-    </script>
+    <main>
+        <!-- 글 목록 시작 -->
+        <article class="post-card">
+            <h2 class="post-title"><a href="post1.html">2026년 추천 가성비 로봇청소기 TOP 3</a></h2>
+            <div class="post-date">2026. 10. 01</div>
+        </article>
+
+        <!-- 나중에 새 글을 쓰면 아래에 요 형태로 계속 추가만 하시면 됩니다 -->
+        <!--
+        <article class="post-card">
+            <h2 class="post-title"><a href="post2.html">글 제목</a></h2>
+            <div class="post-date">날짜</div>
+        </article>
+        -->
+    </main>
 </body>
 </html>
