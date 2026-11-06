@@ -54,25 +54,6 @@
       border-radius: 8px;
       background: #f1f5f9;
     }
-    .gnb-nav {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      gap: 32px;
-    }
-    .nav-item {
-      padding: 12px 0;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-sub);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-    }
-    .nav-item.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-    }
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -107,13 +88,6 @@
       transform: translateY(-4px);
       box-shadow: 0 12px 24px rgba(0,0,0,0.08);
     }
-    .card-thumb {
-      width: 100%;
-      height: 190px;
-      background-color: #e2e8f0;
-      background-size: cover;
-      background-position: center;
-    }
     .card-body {
       padding: 20px;
       display: flex;
@@ -141,11 +115,6 @@
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
-    }
-    .price-tag {
-      font-weight: 800;
-      color: #e11d48;
-      font-size: 1rem;
     }
     .back-btn {
       display: inline-block;
@@ -189,66 +158,81 @@
       <a class="logo" onclick="goHome()">Brand Ai Agent</a>
       <a class="admin-link" href="/admin" target="_blank">관리자(CMS)</a>
     </div>
-    <div class="gnb-nav">
-      <div class="nav-item active" onclick="filterCategory('전체', this)">전체 상품</div>
-      <div class="nav-item" onclick="filterCategory('가전/디지털', this)">가전/디지털</div>
-      <div class="nav-item" onclick="filterCategory('밀키트/식품', this)">밀키트/식품</div>
-    </div>
   </header>
 
   <div class="container">
     <section class="promo-banner" id="promo-section">
-      <h2>🔥 2026 Brand Ai Agent 특가전</h2>
-      <p>광고 없는 내돈내산 추천 알고리즘으로 엄선된 쇼핑 큐레이션</p>
+      <h2>🔥 Brand Ai Agent 쇼핑 큐레이션</h2>
+      <p>실제 저장소의 최신 글을 실시간으로 가져옵니다.</p>
     </section>
 
     <main id="app">
-      <div style="text-align: center; padding: 60px; color: var(--text-muted);">상품을 불러오는 중...</div>
+      <div style="text-align: center; padding: 60px; color: var(--text-muted);">글 목록을 조회 중입니다...</div>
     </main>
   </div>
 
   <script>
-    const posts = [
-      { 
-        name: "post.md", 
-        path: "./post.md", 
-        title: "2026년 추천 가성비 로봇청소기 TOP 3", 
-        tag: "가전/디지털",
-        price: "최저 29만원대~",
-        thumb: "https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=600&q=80"
-      },
-      { 
-        name: "가성비-밀키트-탑-3.md", 
-        path: "./posts/가성비-밀키트-탑-3.md", 
-        altPath: "./가성비-밀키트-탑-3.md", 
-        title: "가성비 밀키트 탑 3 추천 목록", 
-        tag: "밀키트/식품",
-        price: "1만원대 구성",
-        thumb: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80"
+    let activePosts = [];
+
+    async function loadRealPosts() {
+      const app = document.getElementById('app');
+      try {
+        // 실제 저장소 루트 및 posts 폴더 내 .md 파일 탐색
+        const resRoot = await fetch('https://api.github.com/repos/brandaiagent/my-page/contents/');
+        const filesRoot = resRoot.ok ? await resRoot.json() : [];
+        
+        let filesPosts = [];
+        try {
+          const resPosts = await fetch('https://api.github.com/repos/brandaiagent/my-page/contents/posts');
+          if (resPosts.ok) filesPosts = await resPosts.json();
+        } catch (e) {}
+
+        const allFiles = [...(Array.isArray(filesRoot) ? filesRoot : []), ...(Array.isArray(filesPosts) ? filesPosts : [])];
+        const mdFiles = allFiles.filter(f => f.name && f.name.endsWith('.md') && f.name !== 'README.md');
+
+        if (mdFiles.length === 0) {
+          app.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">등록되거나 삭제되지 않은 글이 없습니다.</div>';
+          return;
+        }
+
+        activePosts = [];
+        for (const file of mdFiles) {
+          const contentRes = await fetch(file.download_url);
+          const text = await contentRes.text();
+          
+          const titleMatch = text.match(/title:\s*["']?(.*?)["']?$/m) || text.match(/^#\s+(.*)$/m);
+          const title = titleMatch ? titleMatch[1] : file.name.replace('.md', '');
+          
+          activePosts.push({
+            name: file.name,
+            downloadUrl: file.download_url,
+            title: title,
+            text: text
+          });
+        }
+
+        renderGrid();
+      } catch (err) {
+        app.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">글 목록 불러오기 실패</div>';
       }
-    ];
+    }
 
-    let currentCategory = '전체';
-
-    function renderList(category = '전체') {
+    function renderGrid() {
       const promo = document.getElementById('promo-section');
       if (promo) promo.style.display = 'block';
-      
-      const app = document.getElementById('app');
-      const filtered = category === '전체' ? posts : posts.filter(p => p.tag === category);
 
+      const app = document.getElementById('app');
       let html = '<div class="post-grid">';
-      filtered.forEach((post) => {
-        const originalIndex = posts.indexOf(post);
+      
+      activePosts.forEach((post, idx) => {
         html += `
-          <article class="post-card" onclick="viewPost(${originalIndex})">
-            <div class="card-thumb" style="background-image: url('${post.thumb}');"></div>
+          <article class="post-card" onclick="viewPost(${idx})">
             <div class="card-body">
-              <span class="card-tag">${post.tag}</span>
+              <span class="card-tag">큐레이션</span>
               <h2 class="card-title">${post.title}</h2>
               <div class="card-footer">
-                <span class="price-tag">${post.price}</span>
-                <span style="color:var(--primary); font-weight:700;">상세보기 &rarr;</span>
+                <span>발행 완료</span>
+                <span style="color:var(--primary); font-weight:bold;">상세보기 &rarr;</span>
               </div>
             </div>
           </article>
@@ -258,39 +242,15 @@
       app.innerHTML = html;
     }
 
-    function filterCategory(category, el) {
-      currentCategory = category;
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      el.classList.add('active');
-      renderList(category);
-    }
-
-    async function viewPost(index) {
+    function viewPost(idx) {
       const promo = document.getElementById('promo-section');
       if (promo) promo.style.display = 'none';
-      
-      const app = document.getElementById('app');
-      const post = posts[index];
-      app.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-muted);">상세 정보를 불러오는 중...</div>';
-      
-      let text = '';
-      try {
-        let res = await fetch(post.path);
-        if (!res.ok && post.altPath) {
-          res = await fetch(post.altPath);
-        }
-        if (!res.ok) throw new Error('파일 없음');
-        text = await res.text();
-      } catch (e) {
-        app.innerHTML = `
-          <div class="back-btn" onclick="goHome()">&larr; 목록으로 돌아가기</div>
-          <div style="text-align:center; color:#ef4444; padding: 40px;">본문을 불러오지 못했습니다.</div>
-        `;
-        return;
-      }
 
-      const parts = text.split('---');
-      let markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : text;
+      const app = document.getElementById('app');
+      const post = activePosts[idx];
+
+      const parts = post.text.split('---');
+      let markdownBody = parts.length >= 3 ? parts.slice(2).join('---') : post.text;
 
       markdownBody = markdownBody.replace(/src=["']?images\//g, 'src="./images/')
                                  .replace(/\]\(\s*images\//g, '](./images/')
@@ -299,9 +259,8 @@
       const htmlContent = window.marked ? marked.parse(markdownBody) : markdownBody;
 
       app.innerHTML = `
-        <div class="back-btn" onclick="goHome()">&larr; 목록으로 돌아가기</div>
+        <div class="back-btn" onclick="renderGrid()">&larr; 목록으로 돌아가기</div>
         <article class="detail-container">
-          <span class="card-tag">${post.tag}</span>
           <h1 class="detail-title">${post.title}</h1>
           <div id="content-area">${htmlContent}</div>
         </article>
@@ -310,11 +269,11 @@
     }
 
     function goHome() {
-      renderList(currentCategory);
+      renderGrid();
       window.scrollTo(0, 0);
     }
 
-    renderList();
+    loadRealPosts();
   </script>
 </body>
 </html>
