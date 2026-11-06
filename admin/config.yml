@@ -1,0 +1,19 @@
+backend:
+  name: github
+  repo: brandaiagent/my-page
+  branch: main
+
+media_folder: "images" # 글 작성 시 올리는 이미지 저장 위치
+public_folder: "/images"
+
+collections:
+  - name: "blog"
+    label: "쇼핑 포스팅"
+    folder: "posts" # 글이 저장될 폴더
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "제목", name: "title", widget: "string" }
+      - { label: "발행일", name: "date", widget: "datetime" }
+      - { label: "썸네일 이미지", name: "image", widget: "image", required: false }
+      - { label: "본문 내용", name: "body", widget: "markdown" }
