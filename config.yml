@@ -2,7 +2,8 @@ backend:
   name: github
   repo: brandaiagent/my-page
   branch: main
-  site_domain: my-page-hazel-phi.vercel.app
+  auth_type: implicit
+  token: "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"
 
 media_folder: "images"
 public_folder: "/images"
