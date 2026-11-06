@@ -9,7 +9,7 @@ public_folder: "/images"
 collections:
   - name: "blog"
     label: "쇼핑 포스팅"
-    folder: "posts"
+    folder: "" # 폴더 안이 아닌 메인 위치(루트)에 글 생성
     create: true
     slug: "{{slug}}"
     fields:
