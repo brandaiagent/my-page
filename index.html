@@ -45,7 +45,7 @@
     .container { max-width: 1180px; margin: 0 auto; padding: 0 32px 120px; }
 
     .promo-banner { padding: clamp(56px, 11vw, 128px) 0 clamp(48px, 8vw, 88px); border-bottom: 1px solid var(--line); margin-bottom: 48px; }
-    .promo-banner h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(2.4rem, 7vw, 5.2rem); line-height: 1.2; letter-spacing: -0.04em; }
+    .promo-banner h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(2.4rem, 7vw, 5.2rem); line-height: 1.2; letter-spacing: -0.04em; }
     .promo-banner p::before { content: ''; display: block; width: 40px; height: 1px; background: var(--accent); margin-bottom: 24px; }
     .promo-banner p { margin-top: 48px; font-size: 1rem; color: var(--ink-sub); max-width: 30em; }
 
@@ -55,6 +55,7 @@
     .chip.active { color: var(--ink); border-bottom-color: var(--accent); }
 
     .post-grid { display: grid; gap: 72px 40px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+    a.post-card { color: inherit; text-decoration: none; }
     .post-card { cursor: pointer; display: flex; flex-direction: column; }
     .card-thumb { aspect-ratio: 4 / 5; overflow: hidden; background: var(--chip); display: flex; align-items: center; justify-content: center; }
     @keyframes imgin { from { opacity: 0; } to { opacity: 1; } }
@@ -108,7 +109,7 @@
     .site-footer { max-width: 1180px; margin: 0 auto; padding: 32px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--ink-muted); }
     .site-footer .f-logo { font-family: var(--serif); letter-spacing: 0.06em; color: var(--ink-sub); }
     @media (prefers-reduced-motion: no-preference) {
-      .promo-banner h2 { animation: fade 1s ease both; }
+      .promo-banner h1 { animation: fade 1s ease both; }
       @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     }
     @media (max-width: 600px) {
@@ -129,7 +130,7 @@
 
   <div class="container">
     <section class="promo-banner" id="promo-section">
-      <h2>오래 쓸 물건을,<br>합리적인 가격에.</h2>
+      <h1>오래 쓸 물건을,<br>합리적인 가격에.</h1>
       <p>Brand Ai Agent가 가격 대비 만족도가 높은 제품만 골라 정리합니다.</p>
     </section>
 
@@ -216,10 +217,11 @@
           return;
         }
 
-        activePosts = sources.map(({ name, text }) => {
+        activePosts = sources.map(({ name, text, slug }) => {
           const titleMatch = text.match(/title:\s*["']?(.*?)["']?$/m) || text.match(/^#\s+(.*)$/m);
           return {
             name: name,
+            slug: slug || '',
             title: titleMatch ? titleMatch[1] : name.replace('.md', ''),
             text: text,
             category: getField(text, ['category', 'tag']) || '큐레이션',
@@ -268,8 +270,10 @@
         const thumb = post.thumb
           ? `<img src="${escapeHtml(post.thumb)}" alt="" loading="lazy" onerror="this.parentNode.innerHTML='<span class=card-initial>${escapeHtml(post.title.charAt(0))}</span>'" />`
           : `<span class="card-initial">${escapeHtml(post.title.charAt(0))}</span>`;
+        const href = post.slug ? `/p/${post.slug}/` : '#';
+        const click = post.slug ? '' : ` onclick="viewPost(${idx}); return false;"`;
         html += `
-          <article class="post-card" tabindex="0" onclick="viewPost(${idx})" onkeydown="if(event.key==='Enter')viewPost(${idx})">
+          <a class="post-card" href="${href}"${click}>
             <div class="card-thumb">${thumb}</div>
             <div class="card-body">
               <span class="card-tag">${escapeHtml(post.category)}</span>
@@ -279,7 +283,7 @@
                 <span class="card-more">자세히 보기</span>
               </div>
             </div>
-          </article>
+          </a>
         `;
       });
       html += '</div>';

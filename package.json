@@ -1,0 +1,7 @@
+{
+  "name": "my-page",
+  "private": true,
+  "dependencies": {
+    "marked": "12.0.2"
+  }
+}
