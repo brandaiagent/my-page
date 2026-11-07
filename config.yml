@@ -15,5 +15,7 @@ collections:
     fields:
       - { label: "제목", name: "title", widget: "string" }
       - { label: "발행일", name: "date", widget: "datetime" }
+      - { label: "카테고리", name: "category", widget: "string", required: false, hint: "예: 주방용품, 생활가전, 뷰티" }
+      - { label: "요약문", name: "description", widget: "text", required: false, hint: "검색 결과에 보일 한두 문장 (80자 안팎)" }
       - { label: "썸네일 이미지", name: "image", widget: "image", required: false }
       - { label: "본문 내용", name: "body", widget: "markdown" }
