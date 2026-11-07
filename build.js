@@ -9,6 +9,8 @@ const { marked } = require('marked');
 const SITE_URL = (process.env.SITE_URL || 'https://my-page-hazel-phi.vercel.app').replace(/\/$/, '');
 const SITE_NAME = 'Brand Ai Agent';
 const SITE_DESC = '가격 대비 만족도 높은 제품만 골라 정리하는 쇼핑 큐레이션 블로그, Brand Ai Agent입니다.';
+// 제휴 링크가 있는 글 맨 위에 자동으로 들어가는 문구 (공정위 기준: 제목 또는 첫 부분, 명확한 표현)
+const AFFILIATE_NOTICE = '이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다.';
 const OUT = 'dist';
 const SOURCE_DIRS = ['.', 'posts'];
 const SKIP = new Set(['dist', 'node_modules', 'posts', 'build.js', 'package.json', 'package-lock.json', 'vercel.json']);
@@ -66,19 +68,25 @@ for (const dir of SOURCE_DIRS) {
     if (!fs.statSync(file).isFile()) continue;
     const text = fs.readFileSync(file, 'utf8');
     const body = getBody(text);
+    const affiliate = getField(text, 'affiliate') !== 'false'; // 칸이 없는 예전 글은 제휴 글로 처리
     const heading = body.match(/^#\s+(.*)$/m);
     const title = getField(text, 'title') || (heading ? heading[1] : name.replace('.md', ''));
     const fixed = body
       .replace(/src=(["'])\.?\/?images\//g, 'src=$1/images/')
       .replace(/\]\(\s*\.?\/?images\//g, '](/images/');
-    const html = marked.parse(fixed)
+    let html = marked.parse(fixed)
       .replace(/<table>/g, '<div class="table-wrap"><table>')
       .replace(/<\/table>/g, '</table></div>')
       .replace(/<img /g, '<img loading="lazy" ');
+    if (affiliate) {
+      // 바깥 링크에 '광고성 링크' 표시 + 새 탭 열기 (내 사이트 링크는 제외)
+      html = html.replace(/<a href="(https?:\/\/[^"]*)"/g, (m, url) =>
+        url.startsWith(SITE_URL) ? m : `<a href="${url}" rel="sponsored nofollow noopener" target="_blank"`);
+    }
     const plain = decode(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
     const date = getField(text, 'date');
     posts.push({
-      name, text, title, html, date,
+      name, text, title, html, date, affiliate,
       slug: makeSlug(name),
       category: getField(text, 'category') || '큐레이션',
       desc: getField(text, 'description') || plain.slice(0, 110),
@@ -133,7 +141,8 @@ function postPage(p) {
   ${fontLinks}
   <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>
   ${style}
-  <style>a.back-btn { text-decoration: none; }</style>
+  <style>a.back-btn { text-decoration: none; }
+  .affiliate-notice { font-size: .9rem; color: var(--ink-sub); background: var(--surface); border: 1px solid var(--line); border-left: 2px solid var(--accent); padding: 12px 16px; margin: 0 0 32px; line-height: 1.6; }</style>
 </head>
 <body>
   <header class="gnb">
@@ -147,6 +156,7 @@ function postPage(p) {
     <article class="detail-container">
       <div class="detail-meta"><span class="card-tag">${esc(p.category)}</span>${p.date ? `<time datetime="${esc(iso)}">${formatDate(p.date)}</time>` : ''}</div>
       <h1 class="detail-title">${esc(p.title)}</h1>
+      ${p.affiliate ? `<p class="affiliate-notice">${esc(AFFILIATE_NOTICE)}</p>` : ''}
       <div id="content-area">${p.html}</div>
     </article>
   </div>
