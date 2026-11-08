@@ -95,6 +95,7 @@ for (const dir of SOURCE_DIRS) {
     }).filter(i => i.src);
     posts.push({
       name, text, title, html, date, affiliate, images,
+      notice: getField(text, 'ad_notice') || AFFILIATE_NOTICE,
       updated: getField(text, 'updated') || date,
       slug: makeSlug(name),
       category: getField(text, 'category') || '큐레이션',
@@ -183,7 +184,7 @@ function postPage(p) {
     <article class="detail-container">
       <div class="detail-meta"><span class="card-tag">${esc(p.category)}</span>${p.date ? `<time datetime="${esc(iso)}">${formatDate(p.date)}</time>` : ''}</div>
       <h1 class="detail-title">${esc(p.title)}</h1>
-      ${p.affiliate ? `<p class="affiliate-notice">${esc(AFFILIATE_NOTICE)}</p>` : ''}
+      ${p.affiliate ? `<p class="affiliate-notice">${esc(p.notice)}</p>` : ''}
       <div id="content-area">${p.html}</div>
     </article>
   </div>
