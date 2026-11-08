@@ -74,10 +74,11 @@ for (const dir of SOURCE_DIRS) {
     const fixed = body
       .replace(/src=(["'])\.?\/?images\//g, 'src=$1/images/')
       .replace(/\]\(\s*\.?\/?images\//g, '](/images/');
+    let imgN = 0; // 첫 이미지는 즉시 로드(LCP), 나머지는 지연 로드
     let html = marked.parse(fixed)
       .replace(/<table>/g, '<div class="table-wrap"><table>')
       .replace(/<\/table>/g, '</table></div>')
-      .replace(/<img /g, '<img loading="lazy" ');
+      .replace(/<img /g, () => (imgN++ === 0 ? '<img fetchpriority="high" decoding="async" ' : '<img loading="lazy" decoding="async" '));
     if (affiliate) {
       // 바깥 링크에 '광고성 링크' 표시 + 새 탭 열기 (내 사이트 링크는 제외)
       html = html.replace(/<a href="(https?:\/\/[^"]*)"/g, (m, url) =>
@@ -85,12 +86,20 @@ for (const dir of SOURCE_DIRS) {
     }
     const plain = decode(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
     const date = getField(text, 'date');
+    // 본문 이미지 목록 + 'AI 생성 이미지' 캡션이 달린 이미지 판별 (구조화 데이터용)
+    const aiSrc = new Set([...html.matchAll(/<figure>[\s\S]*?<img[^>]*src="([^"]+)"[\s\S]*?<figcaption>([^<]*)<\/figcaption>/g)]
+      .filter(m => /AI 생성/.test(m[2])).map(m => m[1]));
+    const images = [...html.matchAll(/<img [^>]*>/g)].map(m => {
+      const tag = m[0], g = k => (tag.match(new RegExp(k + '="([^"]*)"')) || [])[1] || '';
+      return { src: absUrl(g('src')), alt: decode(g('alt')), w: +g('width') || 0, h: +g('height') || 0, ai: aiSrc.has(g('src')) };
+    }).filter(i => i.src);
     posts.push({
-      name, text, title, html, date, affiliate,
+      name, text, title, html, date, affiliate, images,
+      updated: getField(text, 'updated') || date,
       slug: makeSlug(name),
       category: getField(text, 'category') || '큐레이션',
       desc: getField(text, 'description') || plain.slice(0, 110),
-      thumb: getField(text, 'image') || getField(text, 'thumbnail') || getField(text, 'cover')
+      thumb: getField(text, 'image') || getField(text, 'thumbnail') || getField(text, 'cover') || (images[0] ? images[0].src : '')
     });
   }
 }
@@ -112,16 +121,31 @@ const fontLinks = (indexSrc.match(/<link rel="stylesheet"[^>]*>/g) || []).join('
 function postPage(p) {
   const url = `${SITE_URL}/p/${p.slug}/`;
   const img = absUrl(p.thumb);
-  let iso = '';
+  let iso = '', isoMod = '';
   try { iso = new Date(p.date).toISOString(); } catch (e) {}
-  const ld = {
-    '@context': 'https://schema.org', '@type': 'BlogPosting',
+  try { isoMod = new Date(p.updated).toISOString(); } catch (e) {}
+  const post = {
+    '@type': 'BlogPosting',
+    '@id': url + '#post',
     headline: p.title, description: p.desc, inLanguage: 'ko', mainEntityOfPage: url,
-    author: { '@type': 'Organization', name: SITE_NAME },
-    publisher: { '@type': 'Organization', name: SITE_NAME }
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL + '/' },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL + '/' }
   };
-  if (iso) { ld.datePublished = iso; ld.dateModified = iso; }
-  if (img) ld.image = [img];
+  if (iso) { post.datePublished = iso; post.dateModified = isoMod || iso; }
+  if (img) post.image = [img];
+  // 이미지별 정보: 제작 주체와 AI 생성 여부를 명시 (저작권 오해 방지)
+  const imageNodes = p.images.map(i => {
+    const o = { '@type': 'ImageObject', contentUrl: i.src, url: i.src, creator: { '@type': 'Organization', name: SITE_NAME } };
+    if (i.alt) o.caption = i.alt;
+    if (i.w && i.h) { o.width = i.w; o.height = i.h; }
+    if (i.ai) o.creditText = SITE_NAME + ' (AI 생성 이미지)';
+    return o;
+  });
+  const crumbs = { '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: SITE_NAME, item: SITE_URL + '/' },
+    { '@type': 'ListItem', position: 2, name: p.title, item: url }
+  ] };
+  const ld = { '@context': 'https://schema.org', '@graph': [post, crumbs].concat(imageNodes) };
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -135,6 +159,9 @@ function postPage(p) {
   <meta property="og:title" content="${esc(p.title)}" />
   <meta property="og:description" content="${esc(p.desc)}" />
   <meta property="og:url" content="${url}" />
+  <meta property="og:locale" content="ko_KR" />
+  ${iso ? `<meta property="article:published_time" content="${esc(iso)}" />` : ''}
+  ${isoMod ? `<meta property="article:modified_time" content="${esc(isoMod)}" />` : ''}
   ${img ? `<meta property="og:image" content="${esc(img)}" />` : ''}
   <meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}" />
   <meta name="color-scheme" content="light dark" />
@@ -190,7 +217,7 @@ fs.writeFileSync(path.join(OUT, 'index.html'), home);
 // ---------- sitemap / robots / posts.json ----------
 const urls = [`<url><loc>${SITE_URL}/</loc></url>`].concat(posts.map(p => {
   let last = '';
-  try { last = `<lastmod>${new Date(p.date).toISOString().slice(0, 10)}</lastmod>`; } catch (e) {}
+  try { last = `<lastmod>${new Date(p.updated || p.date).toISOString().slice(0, 10)}</lastmod>`; } catch (e) {}
   return `<url><loc>${SITE_URL}/p/${p.slug}/</loc>${last}</url>`;
 }));
 fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
