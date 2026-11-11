@@ -1,19 +1,25 @@
-// Vercel 배포 때 자동 실행됩니다.
+// Cloudflare Pages 배포 때 자동 실행됩니다. (빌드 명령: node build.js / 출력 폴더: dist)
 // 글마다 고유 주소의 HTML 페이지, sitemap.xml, robots.txt, posts.json을 dist 폴더에 만듭니다.
+// 사이트별 차이(이름, 설명, 고지문 등)는 모두 site.config.json에서 읽습니다.
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { marked } = require('marked');
 
-// ★ 나중에 내 도메인을 연결하면 이 주소만 바꾸면 됩니다. (끝에 / 없이)
-const SITE_URL = (process.env.SITE_URL || 'https://my-page-hazel-phi.vercel.app').replace(/\/$/, '');
-const SITE_NAME = 'Brand Ai Agent';
-const SITE_DESC = '가격 대비 만족도 높은 제품만 골라 정리하는 쇼핑 큐레이션 블로그, Brand Ai Agent입니다.';
+const CONFIG = JSON.parse(fs.readFileSync('site.config.json', 'utf8'));
+
+// 환경변수 SITE_URL이 있으면 그것을 우선 사용하고, 없으면 site.config.json의 siteUrl을 씁니다. (끝에 / 없이)
+const SITE_URL = (process.env.SITE_URL || CONFIG.siteUrl).replace(/\/$/, '');
+const SITE_NAME = CONFIG.name;
+const SITE_DESC = CONFIG.description;
 // 제휴 링크가 있는 글 맨 위에 자동으로 들어가는 문구 (공정위 기준: 제목 또는 첫 부분, 명확한 표현)
-const AFFILIATE_NOTICE = '이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다.';
+const AFFILIATE_NOTICE = CONFIG.affiliateNotice;
+const DEFAULT_CATEGORY = CONFIG.defaultCategory;
+const FOOTER_TAGLINE = CONFIG.footerTagline;
+const HOME_TITLE_SUFFIX = CONFIG.homeTitleSuffix;
 const OUT = 'dist';
 const SOURCE_DIRS = ['.', 'posts'];
-const SKIP = new Set(['dist', 'node_modules', 'posts', 'build.js', 'package.json', 'package-lock.json', 'vercel.json']);
+const SKIP = new Set(['dist', 'dist-before', 'node_modules', 'posts', 'build.js', 'package.json', 'package-lock.json', 'vercel.json', 'site.config.json', 'compare-dist.js']);
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const decode = s => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
@@ -98,7 +104,7 @@ for (const dir of SOURCE_DIRS) {
       notice: getField(text, 'ad_notice') || AFFILIATE_NOTICE,
       updated: getField(text, 'updated') || date,
       slug: makeSlug(name),
-      category: getField(text, 'category') || '큐레이션',
+      category: getField(text, 'category') || DEFAULT_CATEGORY,
       desc: getField(text, 'description') || plain.slice(0, 110),
       thumb: getField(text, 'image') || getField(text, 'thumbnail') || getField(text, 'cover') || (images[0] ? images[0].src : '')
     });
@@ -188,7 +194,7 @@ function postPage(p) {
       <div id="content-area">${p.html}</div>
     </article>
   </div>
-  <footer class="site-footer"><span class="f-logo">${SITE_NAME}</span><span>가격 대비 만족도 높은 제품 큐레이션</span></footer>
+  <footer class="site-footer"><span class="f-logo">${SITE_NAME}</span><span>${FOOTER_TAGLINE}</span></footer>
   <div id="progress"></div>
   <script>addEventListener('scroll',function(){var h=document.documentElement.scrollHeight-innerHeight;document.getElementById('progress').style.width=(h>0?scrollY/h*100:0)+'%'},{passive:true});</script>
 </body>
@@ -206,7 +212,7 @@ const homeHead = `  <meta name="description" content="${esc(SITE_DESC)}" />
   <link rel="canonical" href="${SITE_URL}/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="${SITE_NAME}" />
-  <meta property="og:title" content="${SITE_NAME} - 쇼핑 큐레이션" />
+  <meta property="og:title" content="${SITE_NAME}${HOME_TITLE_SUFFIX}" />
   <meta property="og:description" content="${esc(SITE_DESC)}" />
   <meta property="og:url" content="${SITE_URL}/" />
 </head>`;
