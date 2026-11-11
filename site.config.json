@@ -1,9 +1,24 @@
 {
-  "siteUrl": "https://my-page-hazel-phi.vercel.app",
+  "siteUrl": "https://my-page-eyb.pages.dev",
   "name": "Brand Ai Agent",
   "description": "가격 대비 만족도 높은 제품만 골라 정리하는 쇼핑 큐레이션 블로그, Brand Ai Agent입니다.",
   "affiliateNotice": "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다.",
   "defaultCategory": "큐레이션",
   "footerTagline": "가격 대비 만족도 높은 제품 큐레이션",
-  "homeTitleSuffix": " - 쇼핑 큐레이션"
+  "homeOgTitleSuffix": "쇼핑 큐레이션",
+  "heroTitleHtml": "오래 쓸 물건을,<br>합리적인 가격에.",
+  "heroDesc": "Brand Ai Agent가 가격 대비 만족도가 높은 제품만 골라 정리합니다.",
+  "githubRepo": "brandaiagent/my-page",
+  "aboutParagraphs": [
+    "Brand Ai Agent는 가격 대비 만족도가 높은 제품을 골라 정리하는 쇼핑 큐레이션 블로그입니다.",
+    "제품 선택에 필요한 기준과 비교 정보를 한곳에 모아, 처음 고르는 분도 쉽게 판단할 수 있도록 돕는 것이 목표입니다."
+  ],
+  "editorialPoints": [
+    "제품 정보는 공개된 판매 페이지와 제조사 자료를 바탕으로 정리합니다.",
+    "제품을 소개할 때 장점뿐 아니라 맞지 않는 경우도 함께 적습니다."
+  ],
+  "policyDate": "2026.11.11",
+  "hasAffiliate": true,
+  "analytics": "",
+  "contactEmail": "kwon0742@naver.com"
 }
