@@ -1,19 +1,20 @@
 ---
-title: "작은 물건 빨려 들어갔을 때 로봇청소기 고장 안 내고 꺼내는 요령"
+title: 작은 물건 빨려 들어갔을 때 로봇청소기 고장 안 내고 꺼내는 요령
 date: 2026-11-20T15:10:44
 updated: 2026-11-20T15:10:44
-category: "생활가전"
-description: "로봇청소기가 동전이나 클립 등 작은 물건을 삼켰을 때 기기를 고장 내지 않고 안전하게 꺼내는 요령을 상세히 알아봅니다. 2026년 11월 20일 기준, 전원 차단과 브러시 분리를 통한 올바른 대처법을 확인하세요."
+category: 생활가전
+description: 로봇청소기가 동전이나 클립 등 작은 물건을 삼켰을 때 기기를 고장 내지 않고 안전하게 꺼내는 요령을 상세히 알아봅니다. 2026년 11월 20일 기준, 전원 차단과 브러시 분리를 통한 올바른 대처법을 확인하세요.
 affiliate: true
-ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
+ad_notice: 이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다.
 image: /images/1795155044354-card-thumb.webp
 ---
+
 로봇청소기가 작동 중에 동전, 머리핀, 종이 클립 같은 작은 물건을 빨아들였을 때 기기를 고장 내지 않고 안전하게 꺼내는 요령을 알아봅니다. 2026년 11월 20일 기준, 로봇청소기 사용 중 이물질 흡입으로 인한 내부 모터 손상을 막으려면 전원을 완전히 차단한 상태에서 브러시와 흡입구 구조를 정확히 파악하고 대처하는 것이 중요합니다. 
 
 무단으로 이물질을 빼내려 하거나 전원이 켜진 채로 작업을 진행하면 기기 내부의 팬이나 회로에 영구적인 손상이 발생할 수 있습니다. 작은 물건 하나가 기기 전체의 수명을 단축할 수 있으므로 침착하고 올바른 순서대로 이물질을 제거해야 하며, 평소 청소 전 주변 정리를 철저히 하는 습관이 기기 수명을 연장하는 지름길이 됩니다.
 
 <figure>
-<img src="/images/robot-vacuum-cleaner-foreign-object-removal-01-robot-vacuum-cleaner-checklist.webp" alt="로봇청소기 이물질 제거 전 체크리스트를 보여주는 카드 이미지" width="1200" height="800">
+<img src="/images/robot-vacuum-cleaner-foreign-object-removal-01-robot-vacuum-cleaner-checklist.webp" alt=width="1200" height="800">
 <figcaption>로봇청소기 이물질 제거 전 필수 확인 사항</figcaption>
 </figure>
 
