@@ -8,12 +8,12 @@
   if (location.pathname.indexOf('/admin') === 0) return;
 
   var css =
-    '.bx-wrap{position:relative;display:inline-block;margin-left:16px;font:inherit}' +
-    '.bx-fixed{position:fixed;top:12px;right:12px;z-index:9999}' +
+    '.bx-wrap{position:relative;display:inline-block;margin:0 12px 0 0;vertical-align:middle;font:inherit}' +
+    '.bx-fixed{position:fixed;top:12px;right:12px;z-index:9999;margin:0}' +
     '.bx-btn{background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer;' +
     'border:1px solid rgba(128,128,128,.4);border-radius:999px;padding:4px 12px}' +
     '.bx-btn:hover{background:rgba(128,128,128,.12)}' +
-    '.bx-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:210px;' +
+    '.bx-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:210px;max-width:calc(100vw - 24px);' +
     'background:Canvas;color:CanvasText;border:1px solid rgba(128,128,128,.3);' +
     'border-radius:12px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9999}' +
     '.bx-open .bx-menu{display:block}' +
@@ -56,7 +56,8 @@
 
   wrap.appendChild(btn);
   wrap.appendChild(menu);
-  var header = document.querySelector('header, .site-header');
-  if (header) { header.appendChild(wrap); }
+
+  var admin = document.querySelector('a[href="/admin"], a[href="/admin/"]');
+  if (admin && admin.parentNode) { admin.parentNode.insertBefore(wrap, admin); }
   else { wrap.classList.add('bx-fixed'); document.body.appendChild(wrap); }
 })();
