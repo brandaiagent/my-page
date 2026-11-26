@@ -28,7 +28,7 @@ function body(card, t, site, idx, total) {
         `<li><b>${i + 1}</b><div><strong>${esc(it.h)}</strong><span>${br(it.d)}</span></div></li>`).join('')}</ol>${foot}`;
     case 'table':
       return `${head}<h2>${br(card.title)}</h2><table><thead><tr>${card.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${card.rows.map(r =>
-        `<tr>${r.map((c, i) => i === 0 ? `<th>${esc(c)}</th>` : `<td>${br(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>${card.note ? `<p class="note">${br(card.note)}</p>` : ''}${foot}`;
+        `<tr>${r.map((c, i) => i === 0 ? `<th>${br(c)}</th>` : `<td>${br(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>${card.note ? `<p class="note">${br(card.note)}</p>` : ''}${foot}`;
     case 'checklist':
       return `${head}<h2>${br(card.title)}</h2><ul class="chk">${card.items.map(it => `<li><i class="${card.warn ? 'warn' : ''}">${card.warn ? '!' : '✓'}</i><span>${br(it)}</span></li>`).join('')}</ul>${foot}`;
     case 'faq':
