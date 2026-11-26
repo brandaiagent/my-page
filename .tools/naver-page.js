@@ -13,13 +13,18 @@ if (!src || !out) { console.log('사용법: node naver-page.js post.json 출력.
 const P = JSON.parse(fs.readFileSync(src, 'utf8'));
 const BASE = `https://raw.githubusercontent.com/brandaiagent/my-page/main/.naver/${P.slug}/`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let body = P.notice ? `<p><b>${esc(P.notice)}</b></p>` : '';
+// 모바일 가독성: 문단은 1~2문장씩 끊고, 문단·사진·소제목 사이에 빈 줄을 넣는다 (네이버 에디터는 <p> 사이 여백을 없애므로 빈 줄을 직접 넣음)
+const GAP = '<p><br></p>';
+const sentences = t => String(t).split(/(?<=[.?!])\s+(?=\S)/).filter(Boolean);
+const chunk = t => { const s = sentences(t), out = []; for (let i = 0; i < s.length; i += 2) out.push(s.slice(i, i + 2).join(' ')); return out; };
+let body = P.notice ? `<p><b>${esc(P.notice)}</b></p>${GAP}` : '';
 for (const [k, v, cap] of P.blocks) {
-  if (k === 'img') body += `<p style="text-align:center"><img src="${BASE + v}" width="740"></p>` + (cap ? `<p style="text-align:center;color:#888;font-size:13px">${esc(cap)}</p>` : '');
-  else if (k === 'h') body += `<h3>${esc(v)}</h3>`;
-  else if (k === 'table') body += `<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%">${v.map((r, i) => `<tr>${r.map(c => i === 0 ? `<th style="background:#f2f2f2">${esc(c)}</th>` : `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>`;
-  else if (k === 'link') body += cap ? `<p style="text-align:center"><a href="${esc(cap)}">${esc(v)} 확인하기</a></p>` : `<p style="background:#fff3b0;padding:10px;text-align:center"><b>[여기에 쇼핑커넥트 상품 넣기: ${esc(v)}]</b></p>`;
-  else body += `<p>${esc(v).replace(/\n/g, '<br>')}</p>`;
+  if (k === 'img') body += `<p style="text-align:center"><img src="${BASE + v}" width="740"></p>` + (cap ? `<p style="text-align:center;color:#888;font-size:13px">${esc(cap)}</p>` : '') + GAP;
+  else if (k === 'h') body += `${GAP}<p><b><span style="font-size:19px">${esc(v)}</span></b></p>${GAP}`;
+  else if (k === 'table') body += GAP + `<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%">${v.map((r, i) => `<tr>${r.map(c => i === 0 ? `<th style="background:#f2f2f2">${esc(c)}</th>` : `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>` + GAP;
+  else if (k === 'link') body += cap ? `<p style="text-align:center"><a href="${esc(cap)}">${esc(v)} 확인하기</a></p>` : `<p style="background:#fff3b0;padding:10px;text-align:center"><b>[여기에 쇼핑커넥트 상품 넣기: ${esc(v)}]</b></p>` + GAP;
+  else if (/\n/.test(v)) body += `<p>${esc(v).replace(/\n/g, '<br>')}</p>${GAP}`;  // 목록·FAQ·출처처럼 줄바꿈이 있는 문단은 그대로
+  else body += chunk(v).map(c => `<p>${esc(c)}</p>${GAP}`).join('');
 }
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>네이버 복사용 - ${esc(P.title)}</title>
 <style>body{font-family:"Malgun Gothic",sans-serif;max-width:780px;margin:0 auto;padding:20px 16px 80px;line-height:1.8;color:#222}
