@@ -3,6 +3,8 @@
 // post.json: { "slug": "oyster-guide", "title": "...", "tags": "#a #b",
 //   "notice": "(쇼핑커넥트 글이면) 맨 위 광고 표시 문구",
 //   "blocks": [ ["img","01.jpg","사진 설명(선택)"], ["h","소제목"], ["p","문단"], ["link","상품명","URL(없으면 빈칸)"] ] }
+// table 블록: ["table", [["머리1","머리2"],["값","값"]]] (3열 이하)
+// 작성 정보(복사 안 됨): "keyword", "related", "intent" 를 주면 맨 위 회색 칸에 표시
 // link 블록: URL이 있으면 링크, 없으면 노란 칸으로 '여기에 쇼핑커넥트 상품 넣기' 표시 (사장님이 에디터에서 직접 넣음)
 // 사진은 먼저 my-page/.naver/<slug>/ 에 올려 push 해 둔다 (점 폴더라 사이트에는 안 올라감)
 const fs = require('fs');
@@ -15,6 +17,7 @@ let body = P.notice ? `<p><b>${esc(P.notice)}</b></p>` : '';
 for (const [k, v, cap] of P.blocks) {
   if (k === 'img') body += `<p style="text-align:center"><img src="${BASE + v}" width="740"></p>` + (cap ? `<p style="text-align:center;color:#888;font-size:13px">${esc(cap)}</p>` : '');
   else if (k === 'h') body += `<h3>${esc(v)}</h3>`;
+  else if (k === 'table') body += `<table border="1" cellpadding="8" style="border-collapse:collapse;width:100%">${v.map((r, i) => `<tr>${r.map(c => i === 0 ? `<th style="background:#f2f2f2">${esc(c)}</th>` : `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</table>`;
   else if (k === 'link') body += cap ? `<p style="text-align:center"><a href="${esc(cap)}">${esc(v)} 확인하기</a></p>` : `<p style="background:#fff3b0;padding:10px;text-align:center"><b>[여기에 쇼핑커넥트 상품 넣기: ${esc(v)}]</b></p>`;
   else body += `<p>${esc(v).replace(/\n/g, '<br>')}</p>`;
 }
@@ -24,6 +27,7 @@ const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>
 button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:10px 14px;cursor:pointer;background:#03c75a;color:#fff}button.g{background:#333}
 .box{border:1px dashed #bbb;border-radius:8px;padding:10px 12px;margin:14px 0;background:#fafafa}#post img{max-width:100%}</style></head><body>
 <div class="tool"><button id="c1" class="g">① 제목 복사</button><button id="c2">② 본문 전체 복사 (사진 포함)</button><button id="c3" class="g">③ 태그 복사</button><span id="msg"></span></div>
+${P.keyword ? `<div class="box" style="background:#eef3f8"><b>작성 정보 (복사 안 됨)</b><br>핵심 키워드: ${esc(P.keyword)}<br>연관 키워드: ${esc(P.related || '')}<br>검색 의도: ${esc(P.intent || '')}</div>` : ''}
 <div class="box"><b>제목</b><br><span id="t">${esc(P.title)}</span></div>
 <div class="box"><b>태그</b><br><span id="g">${esc(P.tags || '')}</span></div>
 <div id="post">${body}</div>
