@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>네이버 발행 · 굴 고르는 법</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--bg:#f4f2ee;--card:#fff;--ink:#1e2229;--sub:#5d636d;--line:#e4e0d8;--accent:#03c75a;--accent-ink:#fff;--photo:#b5562f;--photo-soft:#f6e6dc;--h:#1e2229;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#121315;--card:#1c1d20;--ink:#ecebe7;--sub:#a3a6ad;--line:#2c2e32;--accent:#03c75a;--accent-ink:#0b0c0d;--photo:#e07a4f;--photo-soft:#2e231d;--h:#fff;color-scheme:dark}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.6;letter-spacing:-.02em;word-break:keep-all;padding:0 max(16px,env(safe-area-inset-left)) calc(110px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right))}
+.wrap{max-width:560px;margin:0 auto}
+header{padding:28px 0 18px}
+.badge{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:99px;padding:2px 10px;margin-bottom:10px}
+h1{font-size:22px;line-height:1.35;color:var(--h)}
+.how{margin-top:12px;font-size:14px;color:var(--sub)}
+.how b{color:var(--ink)}
+.steps{display:flex;flex-direction:column;gap:12px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:10px}
+.blk .tag{font-size:12px;font-weight:700;color:var(--sub);display:flex;justify-content:space-between;align-items:center}
+.blk.photo{background:var(--photo-soft);border-color:transparent}
+.blk.photo .tag{color:var(--photo)}
+.blk.photo img{width:100%;border-radius:10px;display:block}
+.blk .txt{font-size:16px;white-space:pre-wrap}
+.blk.h .txt{font-weight:800;font-size:18px}
+.blk.done{opacity:.45}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;font-weight:700}
+.cp{background:var(--ink);color:var(--bg);padding:10px 14px;font-size:14px;align-self:flex-start}
+.cp.ok{background:var(--accent);color:var(--accent-ink)}
+.save1{background:var(--photo);color:#fff;padding:8px 12px;font-size:13px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-left)) calc(10px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-right))}
+.bar .in{max-width:560px;margin:0 auto;display:flex;gap:8px}
+.bar button{flex:1;padding:14px 8px;font-size:15px}
+#saveAll{background:var(--photo);color:#fff}
+#copyAll{background:var(--accent);color:var(--accent-ink)}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+.src a{color:var(--sub);font-size:13px;word-break:break-all}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge">네이버 블로그 발행용 · 검색 비노출 페이지</span>
+    <h1 id="ttl"></h1>
+    <p class="how"><b>폰:</b> 아래 [사진 전체 저장] → 위에서부터 [복사] 누르고 네이버 앱에 붙여넣기, 사진 칸에서는 갤러리 사진을 순서대로 넣기<br><b>PC:</b> [PC 전체 복사] 한 번 → 네이버 에디터에 붙여넣기 (사진이 같이 안 들어가면 폰 방식으로)</p>
+  </header>
+  <div class="steps" id="steps"></div>
+</div>
+<div class="bar"><div class="in"><button id="saveAll">사진 전체 저장</button><button id="copyAll">PC 전체 복사</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const POST = {
+  title: "싱싱한 굴 고르는 법, 생식용·가열조리용 표시부터 확인하세요",
+  blocks: [
+    ["img", "01.jpg"],
+    ["p", "굴은 겨울이 제철이라 이맘때 마트에 봉지굴과 석화가 많이 나옵니다. 그런데 굴을 고를 때 가장 먼저 볼 것은 색이나 크기가 아니라 포장에 적힌 '용도'입니다."],
+    ["p", "식품의약품안전처 안내와 보도 내용을 바탕으로 굴 고르는 법과 안전하게 먹는 법을 정리했습니다."],
+    ["img", "02.jpg"],
+    ["h", "포장의 '용도'부터 보세요"],
+    ["p", "시중 굴 포장에는 '생식용' 또는 '가열조리용'이 적혀 있습니다. '익혀 먹는'이라는 문구도 가열조리용과 같은 뜻으로 보면 됩니다."],
+    ["p", "식약처는 가열조리용이나 익혀 먹는 표시가 있는 굴은 반드시 중심 온도 85℃에서 1분 이상 가열해 먹으라고 당부했습니다. 노로바이러스는 열에 약해서 익혀 먹으면 감염을 막을 수 있기 때문입니다."],
+    ["img", "03.jpg"],
+    ["p", "생식용이라도 겨울철에는 굴국밥이나 굴전처럼 익혀 먹는 쪽이 더 안전합니다."],
+    ["h", "겉모습으로 신선도 고르기"],
+    ["p", "껍데기가 붙은 굴(석화)은 입을 꽉 다물고 있고, 깨끗한 수조 안에 들어 있는 것이 좋습니다."],
+    ["p", "껍데기를 깐 굴은 우윳빛이 돌고 검은 테두리가 선명하며, 알이 굵고 통통하면서 탄력 있는 것을 고르세요."],
+    ["img", "04.jpg"],
+    ["p", "다만 겉모습은 신선도를 보는 기준입니다. 싱싱해 보인다고 노로바이러스가 없다는 뜻은 아니니, 용도 표시를 먼저 확인하세요."],
+    ["h", "겨울에 굴 먹을 때 주의할 점"],
+    ["p", "노로바이러스는 낮은 온도에서도 살아남아 11월부터 이듬해 4월까지 주로 발생합니다."],
+    ["p", "식약처가 2024년 2월 발표한 자료에 따르면, 직전 3개월 동안 생굴 등을 먹고 장염 증상으로 소비자위해감시시스템에 접수된 신고는 385건이었습니다. 최근 3년 같은 기간 평균(155건)의 2.5배입니다."],
+    ["p", "바닷가에서 굴을 직접 따서 먹으면 노로바이러스뿐 아니라 패류독소 중독 위험도 있습니다. 요리 전에는 손을 씻고, 설사나 구토 같은 증상이 있을 때는 요리를 하지 않는 것이 좋습니다."],
+    ["img", "05.jpg"],
+    ["h", "깐 굴 씻는 법"],
+    ["p", "깐 굴은 3% 소금물에 10분 담갔다가 씻거나, 무즙을 푼 물에 5분 정도 두면 이물질을 뺄 수 있습니다. 비린내가 신경 쓰이면 레몬즙이나 식초를 탄 물에 잠깐 담갔다 건지면 됩니다."],
+    ["p", "씻는 것은 이물질과 비린내를 줄이는 과정입니다. 가열조리용 굴은 씻은 뒤에도 꼭 익혀 드세요."],
+    ["img", "06.jpg"],
+    ["h", "장보기 전에 기억할 3가지"],
+    ["p", "포장의 용도 표시를 먼저 보고, 우윳빛 속살과 선명한 검은 테두리, 탄력을 확인하세요. 가열조리용은 중심 온도 85℃에서 1분 이상 익혀 드시면 됩니다."],
+    ["img", "07.jpg"],
+    ["p", "참고한 자료\n- 정책브리핑 '어패류 85도 1분 이상 익혀 먹어야…겨울철 노로바이러스 주의' (식품의약품안전처, 2024.02.02)\nhttps://www.korea.kr/news/policyNewsView.do?newsId=148925536\n- 세계일보 '제철 맞은 굴, 잘못 먹었다간 큰일' (2024.11.15)\nhttps://www.segye.com/newsView/20241115503413\n- 위키트리 '생굴 사기 전 두 눈으로 꼭 확인해야 하는 것'\nhttps://www.wikitree.co.kr/articles/1018172\n\n정보 기준일: 2026-11-27"],
+    ["tags", "#굴고르는법 #굴제철 #생굴 #가열조리용 #생식용굴 #굴손질 #굴씻는법 #노로바이러스 #석화 #봉지굴 #겨울제철음식 #장보기"]
+  ]
+};
+const LABEL = { p: "본문", h: "소제목 (네이버 소제목 스타일로)", tags: "태그 (태그 입력칸에 붙여넣기)" };
+const $ = s => document.querySelector(s);
+const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1600); };
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} ta.remove(); return ok;
+  }
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$('#ttl').textContent = POST.title;
+const steps = $('#steps');
+function addBlock(kind, label, text, img, n) {
+  const b = document.createElement('div');
+  b.className = 'blk ' + kind;
+  if (kind === 'photo') {
+    b.innerHTML = `<div class="tag">사진 ${n} 넣기 <button class="save1">이 사진 저장</button></div><img src="${img}" alt="카드 이미지 ${n}">`;
+    b.querySelector('.save1').onclick = () => saveFiles([img]);
+  } else {
+    b.innerHTML = `<div class="tag">${label}</div><div class="txt"></div><button class="cp">복사</button>`;
+    b.querySelector('.txt').textContent = text;
+    const btn = b.querySelector('.cp');
+    btn.onclick = async () => { if (await copyText(text)) { btn.textContent = '복사됨'; btn.classList.add('ok'); b.classList.add('done'); toast('복사했어요. 네이버에 붙여넣기 하세요'); } else toast('복사가 막혔어요. 글을 길게 눌러 복사해 주세요'); };
+  }
+  steps.appendChild(b);
+}
+addBlock('h', '제목 (제목 칸에 붙여넣기)', POST.title);
+let n = 0;
+POST.blocks.forEach(([k, v]) => k === 'img' ? addBlock('photo', '', '', v, ++n) : addBlock(k, LABEL[k], v));
+const imgs = POST.blocks.filter(b => b[0] === 'img').map(b => b[1]);
+async function saveFiles(list) {
+  try {
+    const files = await Promise.all(list.map(async u => new File([await (await fetch(u)).blob()], u, { type: 'image/jpeg' })));
+    if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  for (const u of list) { const a = document.createElement('a'); a.href = u; a.download = u; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r => setTimeout(r, 400)); }
+  toast('저장이 안 되면 사진을 길게 눌러 저장하세요');
+}
+$('#saveAll').onclick = () => saveFiles(imgs);
+$('#copyAll').onclick = async () => {
+  const base = location.href.replace(/[^/]*$/, '');
+  const html = POST.blocks.map(([k, v]) => k === 'img' ? `<p><img src="${base + v}" width="860"></p>` : k === 'h' ? `<h3>${esc(v)}</h3>` : k === 'tags' ? '' : `<p>${esc(v).replace(/\n/g, '<br>')}</p>`).join('');
+  const plain = POST.blocks.filter(b => b[0] !== 'img' && b[0] !== 'tags').map(b => b[1]).join('\n\n');
+  try { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([plain], { type: 'text/plain' }) })]); toast('본문 전체 복사 완료 (제목·태그는 따로)'); }
+  catch (e) { (await copyText(plain)) ? toast('글만 복사됐어요. 사진은 따로 넣어 주세요') : toast('복사가 막혔어요'); }
+};
+</script>
+</body>
+</html>

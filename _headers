@@ -3,3 +3,6 @@
 
 /admin/*
   X-Robots-Tag: noindex, nofollow
+
+/n/*
+  X-Robots-Tag: noindex, nofollow
