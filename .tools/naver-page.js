@@ -1,7 +1,9 @@
 // 네이버 블로그 PC 복사용 HTML 만들기
 // 사용법: node naver-page.js post.json 출력.html
 // post.json: { "slug": "oyster-guide", "title": "...", "tags": "#a #b",
-//   "blocks": [ ["img","01.jpg","사진 설명(선택)"], ["h","소제목"], ["p","문단"] ] }
+//   "notice": "(쇼핑커넥트 글이면) 맨 위 광고 표시 문구",
+//   "blocks": [ ["img","01.jpg","사진 설명(선택)"], ["h","소제목"], ["p","문단"], ["link","상품명","URL(없으면 빈칸)"] ] }
+// link 블록: URL이 있으면 링크, 없으면 노란 칸으로 '여기에 쇼핑커넥트 상품 넣기' 표시 (사장님이 에디터에서 직접 넣음)
 // 사진은 먼저 my-page/.naver/<slug>/ 에 올려 push 해 둔다 (점 폴더라 사이트에는 안 올라감)
 const fs = require('fs');
 const [src, out] = process.argv.slice(2);
@@ -9,10 +11,11 @@ if (!src || !out) { console.log('사용법: node naver-page.js post.json 출력.
 const P = JSON.parse(fs.readFileSync(src, 'utf8'));
 const BASE = `https://raw.githubusercontent.com/brandaiagent/my-page/main/.naver/${P.slug}/`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-let body = '';
+let body = P.notice ? `<p><b>${esc(P.notice)}</b></p>` : '';
 for (const [k, v, cap] of P.blocks) {
   if (k === 'img') body += `<p style="text-align:center"><img src="${BASE + v}" width="740"></p>` + (cap ? `<p style="text-align:center;color:#888;font-size:13px">${esc(cap)}</p>` : '');
   else if (k === 'h') body += `<h3>${esc(v)}</h3>`;
+  else if (k === 'link') body += cap ? `<p style="text-align:center"><a href="${esc(cap)}">${esc(v)} 확인하기</a></p>` : `<p style="background:#fff3b0;padding:10px;text-align:center"><b>[여기에 쇼핑커넥트 상품 넣기: ${esc(v)}]</b></p>`;
   else body += `<p>${esc(v).replace(/\n/g, '<br>')}</p>`;
 }
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>네이버 복사용 - ${esc(P.title)}</title>
