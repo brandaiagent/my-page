@@ -3,8 +3,8 @@ backend:
   repo: brandaiagent/my-page
   branch: main
 
-site_url: https://my-page-eyb.pages.dev
-display_url: https://my-page-eyb.pages.dev
+site_url: https://brandaihub.com
+display_url: https://brandaihub.com
 
 media_folder: images
 public_folder: /images

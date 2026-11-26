@@ -43,6 +43,11 @@ const HOME_OG_SUFFIX = CONFIG.homeOgTitleSuffix;
 const HERO_TITLE_HTML = CONFIG.heroTitleHtml;
 const HERO_DESC = CONFIG.heroDesc;
 const GITHUB_REPO = CONFIG.githubRepo;
+// 예전 주소(예: xxx.pages.dev)로 들어온 방문자와 검색엔진을 새 주소로 보냅니다. site.config.json 의 redirectHosts 에 적은 주소에서만 동작합니다.
+const REDIRECT_HOSTS = (CONFIG.redirectHosts || []).map(h => String(h).toLowerCase());
+const REDIRECT_JS = REDIRECT_HOSTS.length
+  ? `<script>if(${JSON.stringify(REDIRECT_HOSTS)}.indexOf(location.hostname)>-1)location.replace(${JSON.stringify(SITE_URL)}+location.pathname+location.search+location.hash)</script>`
+  : '';
 const OUT = 'dist';
 const SOURCE_DIRS = ['.', 'posts'];
 const SKIP = new Set(['dist', 'node_modules', 'posts', 'build.js', 'package.json', 'package-lock.json', 'vercel.json', 'site.config.json']);
@@ -263,6 +268,7 @@ function trustPage(t) {
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  ${REDIRECT_JS}
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${esc(t.title)} | ${SITE_NAME}</title>
   <meta name="description" content="${esc(t.desc)}" />
@@ -331,6 +337,7 @@ function postPage(p) {
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  ${REDIRECT_JS}
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${esc(p.title)} | ${SITE_NAME}</title>
   <meta name="description" content="${esc(p.desc)}" />
@@ -411,7 +418,8 @@ const homeLd = { '@context': 'https://schema.org', '@graph': [
   { '@type': 'ItemList', itemListElement: posts.map((p, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE_URL}/p/${p.slug}/`, name: p.title })) }
 ] };
 const list = posts.map(p => `<li><a href="/p/${p.slug}/">${esc(p.title)}</a></li>`).join('');
-const homeHead = `  <meta name="description" content="${esc(SITE_DESC)}" />
+const homeHead = `  ${REDIRECT_JS}
+  <meta name="description" content="${esc(SITE_DESC)}" />
   <link rel="canonical" href="${SITE_URL}/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="${SITE_NAME}" />
