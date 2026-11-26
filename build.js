@@ -32,8 +32,8 @@ function loadConfig() {
   return { ...DEFAULT_CONFIG, ...user };
 }
 const CONFIG = loadConfig();
-// 환경변수 SITE_URL 이 있으면 그것이 우선입니다. (끝에 / 없이)
-const SITE_URL = (process.env.SITE_URL || CONFIG.siteUrl).replace(/\/$/, '');
+// site.config.json 의 siteUrl 이 우선이고, 없을 때만 환경변수 SITE_URL 을 씁니다. (끝에 / 없이)
+const SITE_URL = (CONFIG.siteUrl || process.env.SITE_URL || '').replace(/\/$/, '');
 const SITE_NAME = CONFIG.name;
 const SITE_DESC = CONFIG.description;
 const AFFILIATE_NOTICE = CONFIG.affiliateNotice;
@@ -44,7 +44,9 @@ const HERO_TITLE_HTML = CONFIG.heroTitleHtml;
 const HERO_DESC = CONFIG.heroDesc;
 const GITHUB_REPO = CONFIG.githubRepo;
 // 예전 주소(예: xxx.pages.dev)로 들어온 방문자와 검색엔진을 새 주소로 보냅니다. site.config.json 의 redirectHosts 에 적은 주소에서만 동작합니다.
-const REDIRECT_HOSTS = (CONFIG.redirectHosts || []).map(h => String(h).toLowerCase());
+// 새 주소 자신은 절대 목록에 넣지 않습니다. (자기 자신으로 계속 이동하는 사고 방지)
+const SITE_HOST = SITE_URL.replace(/^https?:\/\//, '').split('/')[0].toLowerCase();
+const REDIRECT_HOSTS = (CONFIG.redirectHosts || []).map(h => String(h).toLowerCase()).filter(h => h && h !== SITE_HOST);
 const REDIRECT_JS = REDIRECT_HOSTS.length
   ? `<script>if(${JSON.stringify(REDIRECT_HOSTS)}.indexOf(location.hostname)>-1)location.replace(${JSON.stringify(SITE_URL)}+location.pathname+location.search+location.hash)</script>`
   : '';
