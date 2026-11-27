@@ -8,3 +8,8 @@
 - 배경: Pixabay 영상(키: 스크래치패드 .pixabay_key, /api/videos/), 첫 장면만 확대→축소 펀치, 장면 전환 순간 짧은 흰 플래시, 상단 노란 진행 막대
 - 소리: 나레이션 없음, 무음 트랙만. 배경음악은 사장님이 업로드할 때 앱에서 선택
 - 만드는 법: captions-kimchi-example.js 의 SCENES·TOTAL 을 글 내용에 맞게 바꿔 투명 PNG 프레임 렌더 → 배경 영상 컷 이어 붙이기 → ffmpeg overlay + 진행 막대
+
+## 자동 제작 (2026-11-27 추가)
+- `python3 .tools/shorts/make-short.py spec.json 작업폴더 출력.mp4` 한 줄로 배경 컷 → 자막 프레임(kinetic.js) → 합성 → 확인용 sheet.png 까지
+- spec: `{total, tag, scenes:[...], segs:[{video,ss,d,punch}|{image,d}]}` (segs 길이 합 = total, 영상 길이보다 ss+d 가 길면 영상이 짧아지니 확인)
+- 제품 주제는 마지막 장면에 `arrow` (네이버 클립 왼쪽 아래 상품 칩 쪽), 정보 주제는 "저장 해두세요 / 자세한 건 블로그에"
