@@ -17,7 +17,8 @@ srv.listen(0, async () => {
   const times = flag === '--preview'
     ? L.map((l, j) => { const e = L[j + 1] ? L[j + 1].start : TL.T; return l.start + (e - l.start) * 0.6; })
     : [...Array(Math.round(TL.T * FPS)).keys()].map(f => f / FPS);
-  for (let i = 0; i < times.length; i++) {
+  const from = +(process.env.FROM || 0);
+  for (let i = from; i < times.length; i++) {
     await p.evaluate(([t, TL]) => new Promise(res => { window.renderFrame(t, TL); requestAnimationFrame(() => requestAnimationFrame(res)); }), [times[i], TL]);
     await p.screenshot({ path: path.join(out, `f${String(i).padStart(4, '0')}.jpg`), type: 'jpeg', quality: 90 });
   }

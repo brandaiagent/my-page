@@ -161,13 +161,13 @@ function shot(i,lt,L,talkH,talkD){
   } else if(i===10){ // 허당 벌떡 + 가보자고
     eh='smile';const up=clamp(lt/.5);heo.body.rotation.x=-1.45*(1-outBack(up));heo.body.position.y=Math.sin(clamp(lt/.6)*Math.PI)*.15;
     heo.arms[0].rotation.z=-2.7;heo.arms[1].rotation.set(0,0,2.7);
-    camTo(V([0,1.45,4.8],[0,1.45,4.4],ease(k)),new THREE.Vector3(0,1.05,0));
+    camTo(V([0,1.6,5.4],[0,1.6,5.0],ease(k)),new THREE.Vector3(0,1.3,0));
   } else { // 엔딩: 좋아요·공유
     eh='smile';ed='smile';heo.arms[0].rotation.z=-2.7;ddok.arms[1].rotation.z=2.2+Math.sin(lt*8)*.3;
-    camTo(new THREE.Vector3(0,1.45,4.6),new THREE.Vector3(0,1.0,0));
+    camTo(new THREE.Vector3(0,1.6,5.2),new THREE.Vector3(0,1.3,0));
     const liked=lt>.5;
-    html=stamp(`<div style="width:220px;height:220px;border-radius:50%;background:${liked?'#ff3b3b':'#fff'};border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="120" height="120" viewBox="0 0 24 24"><path fill="${liked?'#fff':'#111'}" d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6c-.4.4-.6.9-.6 1.4V19a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg></div>`,lt/.3,300,620,-6)
-      +stamp(`<div style="width:200px;height:200px;border-radius:50%;background:#25c26e;border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#fff" d="M14 5v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7-7-7z"/></svg></div>`,(lt-1.2)/.3,720,620,6);
+    html=stamp(`<div style="width:220px;height:220px;border-radius:50%;background:${liked?'#ff3b3b':'#fff'};border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="120" height="120" viewBox="0 0 24 24"><path fill="${liked?'#fff':'#111'}" d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6c-.4.4-.6.9-.6 1.4V19a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg></div>`,lt/.3,300,1000,-6)
+      +stamp(`<div style="width:200px;height:200px;border-radius:50%;background:#25c26e;border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#fff" d="M14 5v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7-7-7z"/></svg></div>`,(lt-1.2)/.3,720,1000,6);
   }
   expr(heo,eh,talkH);expr(ddok,ed,talkD);
   return html;
@@ -176,7 +176,8 @@ let CAPS=null;
 window.renderFrame=(t,TL)=>{
   T=t;reset();document.getElementById('flash').style.opacity=0;
   const Ls=TL.lines;let cur=Ls.findIndex((l,j)=>t<(Ls[j+1]?Ls[j+1].start:TL.T));if(cur<0)cur=Ls.length-1;
-  const l=Ls[cur], L=(Ls[cur+1]?Ls[cur+1].start:TL.T)-l.start, lt=Math.max(0,t-l.start);
+  if(Ls[cur].i===99&&cur>0) cur--;  // 엔딩은 마지막 대사 장면을 이어서
+  const l=Ls[cur], L=(cur===Ls.length-2?TL.T:(Ls[cur+1]?Ls[cur+1].start:TL.T))-l.start, lt=Math.max(0,t-l.start);
   // 말하는 입: 단어 안이면 열고 닫기
   let talk=0;for(const w of l.words) if(t>=w.start&&t<=w.end) talk=.5+.5*Math.sin(t*38);
   const html=shot(l.i===99?11:l.i,lt,L,l.who==='허당'?talk:0,l.who==='똑순이'?talk:0);
