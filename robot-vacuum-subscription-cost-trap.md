@@ -89,5 +89,6 @@ image: /images/1795155352414-card-thumb.webp
 - [코웨이, 교보문고와 마케팅 제휴 협약 체결…고객 대상 이벤트 진행](https://www.thedailypost.kr/news/articleView.html?idxno=117105) — thedailypost.kr, 2026-11-20 보도
 - [레어리, 현대백화점서 VIP 대상 대면 컨설팅 단독 선보여](https://www.businesskorea.co.kr/news/articleView.html?idxno=281832) — businesskorea.co.kr, 2026-11-20 보도
 - [캠톡, 영상통화에 실시간 번역 자막 도입… 글로벌 이용자 간 소통 기능...](https://www.itbiznews.com/news/articleView.html?idxno=232274) — itbiznews.com, 2026-11-20 보도
+- 사진 일부: Pixabay (무료 이용 허가 이미지)
 
 2026년 11월 20일 기준 내용입니다. 가격과 사양은 판매처와 시기에 따라 달라질 수 있으니 구매 전에 판매 페이지에서 다시 확인해 주세요.

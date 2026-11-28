@@ -79,5 +79,6 @@ image: /images/1795156552617-card-thumb.webp
 - ["껍질 버리면 다이어트 효과 반토막?"… 고구마 100% 건강하게 먹는 법](https://www.gukjenews.com/news/articleView.html?idxno=3752011) — gukjenews.com, 2026-11-14 보도
 - [“냉장고 속 남는 채소에 아보카도유 발라 보세요”… 바삭한 ‘한입 간...](https://health.chosun.com/site/data/html_dir/2026/11/12/2026111203222.html) — 조선일보, 2026-11-13 보도
 - [“붕어빵 3마리 천원어치 주세요”는 옛말…겨울간식 일제히 ‘껑충’](https://www.kyeonggi.com/article/20261109580131) — kyeonggi.com, 2026-11-09 보도
+- 사진 일부: Pixabay (무료 이용 허가 이미지)
 
 2026년 11월 20일 기준 내용입니다. 가격과 사양은 판매처와 시기에 따라 달라질 수 있으니 구매 전에 판매 페이지에서 다시 확인해 주세요.

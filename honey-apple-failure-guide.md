@@ -91,5 +91,6 @@ A. 먼저 판매처의 교환·환불 기준을 확인하세요. 신선식품은
 
 - [저녁에 먹으면 독? 사과에 대한 오해와 진실](https://kormedi.com/1216386/) — 코메디닷컴 (농촌진흥청 협업), 확인일 2026-11-26
 - [Influence of Air Temperature during the Growing Period on Water Core Occurrence in 'Hongro' Apple](https://koreascience.kr/article/JAKO200933063804024.page) — 한국농림기상학회지, 2009, 확인일 2026-11-26
+- 사진 일부: Pixabay (무료 이용 허가 이미지)
 
 정보 기준일: 2026-11-26. 가격과 판매 조건은 판매처와 시기에 따라 달라질 수 있으니 구매 전 판매 페이지에서 다시 확인하세요.
