@@ -1,16 +1,17 @@
 {
-  "_설명": "쇼츠 나레이션 설정. API 키는 넣지 않는다(환경 변수 TYPECAST_API_KEY 또는 세션 네트워크 비밀). voices = 사장님이 고른 목소리(2026-11-28). spec 에 \"voice\": \"도윤\" 처럼 이름을 주면 그 목소리, 없으면 날짜·순번으로 돌아가며 씀 / 2026-11-28 사장님 지시: 기본 톤은 기쁘고 활기차게(emotion happy, 세기 1.3, 속도 1.15). spec 에 \"emotion\" 으로 바꿀 수 있음",
-  "voices": {
-    "도윤": "tc_6a3350f8e5a50a4abe948fa8",
-    "상현": "tc_69fc0cff784968297fb45daa",
-    "나윤": "tc_6aab6f4f07622ec83b7ec21a",
-    "서진": "tc_68537c9420b646f2176890ba",
-    "소예": "tc_6837dec48fc46637a9272b88"
-  },
-  "voice_id": null,
-  "model": "ssfm-v31",
-  "language": "kor",
-  "tempo": 1.15,
-  "emotion": "happy",
-  "emotion_intensity": 1.3
+ "_설명": "쇼츠 나레이션 설정. API 키는 넣지 않는다(환경 변수 TYPECAST_API_KEY 또는 세션 네트워크 비밀). voices = 사장님이 고른 목소리(2026-11-28). spec 에 \"voice\": \"도윤\" 처럼 이름을 주면 그 목소리, 없으면 날짜·순번으로 돌아가며 씀 / 2026-11-28 사장님 지시: 기본 톤은 기쁘고 활기차게(emotion happy, 세기 1.3, 속도 1.15). spec 에 \"emotion\" 으로 바꿀 수 있음",
+ "voices": {
+  "도윤": "tc_6a3350f8e5a50a4abe948fa8",
+  "상현": "tc_69fc0cff784968297fb45daa",
+  "나윤": "tc_6aab6f4f07622ec83b7ec21a",
+  "서진": "tc_68537c9420b646f2176890ba",
+  "소예": "tc_6837dec48fc46637a9272b88",
+  "필재": "tc_68257f68bc6e3c161ab5078d"
+ },
+ "voice_id": null,
+ "model": "ssfm-v31",
+ "language": "kor",
+ "tempo": 1.15,
+ "emotion": "happy",
+ "emotion_intensity": 1.3
 }
