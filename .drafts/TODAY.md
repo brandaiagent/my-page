@@ -1,18 +1,18 @@
-# 2026-11-28 09시 발행 결과
-작성: 2026-11-28T09:10 (한국 시간)
+# 2026-11-28 21시 발행 결과
+작성: 2026-11-28T21:10 (한국 시간)
 
 ## 발행됨 (4개)
 | 사이트 | 제목 | 주소 | 고친 점 한 줄 |
 | --- | --- | --- | --- |
-| 쇼핑 | 가습기 흰 가루, 공기청정기 미세먼지 수치 오를 때 원인 | https://brandaihub.com/p/ultrasonic-humidifier-white-dust-air-purifier/ | 탄소매트 세탁법은 공식 근거가 없어 주제 교체, 저장된 가습기 링크 사용, 맞는 사진이 없어 카드만 |
-| 교육 | 수시 합격 후 정시 지원 금지, 등록 포기해도 적용될까 | https://edu.brandaihub.com/p/susi-pass-jeongsi-application-ban/ | 대교협 원문으로 규정 문장 확인 |
-| 스포츠 | 야구 WHIP 뜻과 계산법, 이닝당 출루허용률 보는 법 | https://sports.brandaihub.com/p/whip-meaning-calculation/ | KBO 기록실 메뉴 이름을 확인된 표현으로 수정 |
-| 디지털 | 모두의 AI 12월 출시, 무료 범위와 3사 서비스 차이 (이슈) | https://digital.brandaihub.com/p/modu-ai-launch-skt-kt-kakao/ | 12월 15일은 보도 기준으로 명시, 내부 링크 주소 수정 |
+| 쇼핑 | 전기포트 물때 제거, 구연산 비율과 식초 세척 순서 | https://brandaihub.com/p/electric-kettle-scale-citric-acid/ | 가습기 대신 주방 주제로 분산, 저장된 구연산 링크 사용, 사진 썸네일 |
+| 교육 | 2027 공무원 시험 변화, 9급 한국사는 한능검 3급으로 | https://edu.brandaihub.com/p/2027-civil-service-exam-changes/ | 제목 30자로 줄임, 블로그 정리 일정(출처 약함)은 빼고 인사처 발표만, 상담 카드 넣음 |
+| 스포츠 | 야구 WAR 뜻, 대체 선수보다 몇 승을 더 벌었나 | https://sports.brandaihub.com/p/war-meaning-baseball/ | 확인 안 된 국내 WAR 설명 문장 삭제 |
+| 디지털 | ChatGPT 대화 학습 끄는 법, 메모리·임시 채팅 차이 | https://digital.brandaihub.com/p/chatgpt-training-off-memory-temporary-chat/ | 메뉴 이름은 영어 원문 병기 (한국어 화면 표기 차이 안내) |
 
 ## 링크 필요
 | 번호 | 사이트 | 제목 | 필요한 상품 | 애드픽 후보(상품명·몰·가격) |
 | --- | --- | --- | --- | --- |
-| - | - | - | 없음 (저장된 가습기 링크 사용) | - |
+| - | - | - | 없음 (저장된 구연산 링크 사용) | - |
 
 ## 대기 중
 - 없음
