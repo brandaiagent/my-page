@@ -1,0 +1,105 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=block" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;font-family:'Noto Sans KR';background:linear-gradient(180deg,#eef3ff 0%,#dfe8ff 100%);word-break:keep-all}
+#bar{position:absolute;left:0;top:0;height:14px;background:#ffcf33;width:0}
+#head{position:absolute;left:0;right:0;top:170px;text-align:center;font-weight:900;font-size:104px;letter-spacing:-4px;color:#1b2a55}
+#head span{display:inline-block;background:#fff;border-radius:28px;padding:10px 44px;box-shadow:0 12px 0 #1b2a55}
+#tag{position:absolute;left:0;right:0;top:66px;text-align:center;font-weight:700;font-size:40px;color:#3b5bd9}
+#art{position:absolute;left:0;top:360px;width:1080px;height:1060px}
+#cap{position:absolute;left:60px;right:60px;top:1470px;text-align:center;font-weight:900;font-size:70px;line-height:1.32;letter-spacing:-2px;color:#1b2a55}
+#cap .w{display:inline-block;margin:0 8px;transition:none}
+#cap .now{color:#fff;background:#3b5bd9;border-radius:16px;padding:0 12px}
+#cap .later{color:#9aa6c6}
+#src{position:absolute;left:0;right:0;bottom:70px;text-align:center;font-size:30px;color:#6b7699;font-weight:500}
+</style></head><body>
+<div id="bar"></div><div id="tag">진짜 이유</div><div id="head"></div>
+<svg id="art" viewBox="0 0 1080 1060"></svg>
+<div id="cap"></div><div id="src"></div>
+<script>
+const NAVY='#1b2a55',BLUE='#3b5bd9',SKY='#bfe3ff',YEL='#ffcf33',RED='#ff4d4d',WHITE='#fff';
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>1-Math.pow(1-clamp(x),3);
+const pop=x=>{x=clamp(x);return x<1?1.15*Math.sin(x*Math.PI/2)-0.15*x*x*0:1};
+// ---------- drawing primitives ----------
+function wheelchairTop(x,y,rot,s=1){ // top view, facing up (front = up)
+  return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
+   <rect x="-62" y="-70" width="124" height="150" rx="26" fill="${BLUE}" stroke="${NAVY}" stroke-width="10"/>
+   <rect x="-92" y="-40" width="26" height="110" rx="12" fill="${NAVY}"/><rect x="66" y="-40" width="26" height="110" rx="12" fill="${NAVY}"/>
+   <circle cx="0" cy="-8" r="34" fill="#ffd9b8" stroke="${NAVY}" stroke-width="8"/>
+   <path d="M-30 -96 L0 -126 L30 -96" fill="none" stroke="${YEL}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></g>`;}
+function cabinTop(open=0,mirrorGlow=0){ // square cabin top view, doors at bottom, mirror at top (back wall)
+  const L=250,T=180,W=580,H=580,d=open*140;
+  return `<rect x="${L}" y="${T}" width="${W}" height="${H}" rx="20" fill="#f7f9ff" stroke="${NAVY}" stroke-width="18"/>
+   <rect x="${L+70}" y="${T+6}" width="${W-140}" height="26" rx="8" fill="${SKY}" stroke="${NAVY}" stroke-width="6"/>
+   ${mirrorGlow?`<rect x="${L+60}" y="${T-4}" width="${W-120}" height="46" rx="14" fill="none" stroke="${YEL}" stroke-width="${10*mirrorGlow}" opacity="${mirrorGlow}"/>`:''}
+   <rect x="${L+150-d}" y="${T+H-14}" width="140" height="28" fill="${YEL}" stroke="${NAVY}" stroke-width="6"/>
+   <rect x="${L+290+d}" y="${T+H-14}" width="140" height="28" fill="${YEL}" stroke="${NAVY}" stroke-width="6"/>
+   <text x="540" y="${T+H+86}" text-anchor="middle" font-size="44" font-weight="700" fill="${NAVY}">문</text>
+   <text x="540" y="${T-30}" text-anchor="middle" font-size="40" font-weight="700" fill="${BLUE}">뒷벽 거울</text>`;}
+function bigX(x,y,k){ if(k<=0) return ''; const s=0.6+0.4*ease(k*1.6);
+  return `<g transform="translate(${x},${y}) scale(${s})" opacity="${clamp(k*3)}"><circle r="120" fill="none" stroke="${RED}" stroke-width="26"/><path d="M-70 -70 L70 70 M70 -70 L-70 70" stroke="${RED}" stroke-width="26" stroke-linecap="round"/></g>`;}
+function check(x,y,k){ if(k<=0) return ''; const s=0.6+0.4*ease(k*1.6);
+  return `<g transform="translate(${x},${y}) scale(${s})" opacity="${clamp(k*3)}"><circle r="110" fill="#2fbf71"/><path d="M-50 0 L-12 38 L56 -40" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/></g>`;}
+// ---------- scenes (local time lt, scene length L) ----------
+const SCENES=[
+ {head:'얼굴용이 아니다?', draw:(lt)=>{ // front view mirror with smiley + X
+   const k=ease(lt/0.5);
+   return `<g transform="translate(0,${(1-k)*80})" opacity="${k}">
+    <rect x="240" y="120" width="600" height="760" rx="30" fill="#f7f9ff" stroke="${NAVY}" stroke-width="18"/>
+    <rect x="320" y="190" width="440" height="560" rx="24" fill="${SKY}" stroke="${NAVY}" stroke-width="10"/>
+    <path d="M360 260 L460 200 M360 340 L520 230" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".8"/>
+    <circle cx="540" cy="470" r="110" fill="#ffd9b8" stroke="${NAVY}" stroke-width="10"/>
+    <circle cx="500" cy="450" r="12" fill="${NAVY}"/><circle cx="580" cy="450" r="12" fill="${NAVY}"/>
+    <path d="M495 510 Q540 545 585 510" fill="none" stroke="${NAVY}" stroke-width="10" stroke-linecap="round"/></g>
+    ${bigX(540,470,(lt-1.0)/0.6)}`;}},
+ {head:'휠체어는 못 돌아요', draw:(lt)=>{
+   const r=lt<1.6? 40*Math.sin(lt*6)*clamp(lt/0.4):0;
+   return cabinTop(0)+wheelchairTop(540,480,r,1.15)+
+    `<path d="M380 470 A170 170 0 0 1 700 470" fill="none" stroke="${RED}" stroke-width="12" stroke-dasharray="26 18" opacity="${clamp(lt*2)}"/>`+bigX(860,300,(lt-1.4)/0.6);}},
+ {head:'뒤로 나가야 하는데', draw:(lt)=>{
+   const y=470+ease(lt/1.6)*120;
+   return cabinTop(0)+wheelchairTop(540,y,0,1.15)+
+    `<g opacity="${clamp((lt-0.6)*2)}"><path d="M540 ${y+150} L540 ${y+230}" stroke="${BLUE}" stroke-width="16" stroke-linecap="round"/><path d="M505 ${y+200} L540 ${y+240} L575 ${y+200}" fill="none" stroke="${BLUE}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="870" y="900" font-size="150" font-weight="900" fill="${RED}" opacity="${clamp((lt-1.4)*2)}">?</text>`;}},
+ {head:'거울로 문 확인!', draw:(lt)=>{
+   const g=clamp((lt-0.2)/0.4), o=ease((lt-1.0)/0.8);
+   return cabinTop(o,g)+wheelchairTop(540,590,0,1.15)+
+    `<g opacity="${clamp((lt-0.4)*2)}"><path d="M540 460 L540 230" stroke="${YEL}" stroke-width="10" stroke-dasharray="20 14"/>
+     <path d="M560 230 L720 760" stroke="${YEL}" stroke-width="10" stroke-dasharray="20 14"/></g>`+check(860,300,(lt-1.4)/0.6);}},
+ {head:'법으로 정해 뒀어요', draw:(lt)=>{
+   const k=ease(lt/0.5), st=(lt-0.7)/0.4;
+   return `<g transform="translate(0,${(1-k)*80})" opacity="${k}">
+    <rect x="300" y="140" width="480" height="640" rx="24" fill="#fff" stroke="${NAVY}" stroke-width="14"/>
+    ${[0,1,2,3,4,5].map(i=>`<rect x="360" y="${250+i*80}" width="${360-(i%2)*80}" height="24" rx="12" fill="#c9d3ee"/>`).join('')}
+    <text x="540" y="215" text-anchor="middle" font-size="44" font-weight="900" fill="${NAVY}">편의증진법 시행규칙</text></g>
+    ${st>0?`<g transform="translate(700,700) rotate(-14) scale(${1.4-0.4*ease(st)})" opacity="${clamp(st*3)}"><rect x="-150" y="-70" width="300" height="140" rx="20" fill="none" stroke="${RED}" stroke-width="16"/><text y="26" text-anchor="middle" font-size="80" font-weight="900" fill="${RED}">의무</text></g>`:''}`;}},
+ {head:'뒷벽에 0.6m 이상', draw:(lt)=>{ // side view: back wall, mirror height
+   const k=ease(lt/0.5), h=ease((lt-0.6)/0.8);
+   return `<g opacity="${k}"><rect x="260" y="120" width="560" height="760" rx="20" fill="#f7f9ff" stroke="${NAVY}" stroke-width="18"/>
+    <rect x="360" y="230" width="360" height="${380}" rx="16" fill="${SKY}" stroke="${NAVY}" stroke-width="10"/>
+    <path d="M400 300 L480 250 M400 370 L540 280" stroke="#fff" stroke-width="16" stroke-linecap="round" opacity=".8"/>
+    <line x1="260" y1="880" x2="820" y2="880" stroke="${NAVY}" stroke-width="18"/>
+    <g opacity="${h}"><path d="M215 880 L215 ${880-270*h}" stroke="${RED}" stroke-width="12"/><path d="M185 880 L245 880 M185 610 L245 610" stroke="${RED}" stroke-width="12"/>
+     <text x="200" y="560" text-anchor="middle" font-size="58" font-weight="900" fill="${RED}">0.6m↑</text></g></g>`;}},
+ {head:'거울 앞은 비워 주세요', draw:(lt)=>{
+   const k=ease(lt/0.6);
+   const person=(x,y,c)=>`<g transform="translate(${x},${y})"><circle cy="-120" r="48" fill="#ffd9b8" stroke="${NAVY}" stroke-width="8"/><rect x="-60" y="-70" width="120" height="170" rx="40" fill="${c}" stroke="${NAVY}" stroke-width="8"/></g>`;
+   return cabinTop(1,1)+person(380-k*60,520,'#8fd3a8')+person(700+k*60,520,'#ffb38a')+wheelchairTop(540,560,0,1.05)+
+    `<path d="M540 ${300-k*20} c-30-40-90-10-60 30 l60 60 60-60 c30-40-30-70-60-30z" fill="${RED}" opacity="${clamp((lt-0.8)*2)}"/>`;}}
+];
+window.renderFrame=(t,W,B,T)=>{ // W: words, B: scene bounds [[s,e]...], T total
+  document.getElementById('bar').style.width=(t/T*1080)+'px';
+  let si=B.findIndex(b=>t<b[1]); if(si<0) si=B.length-1;
+  const [s,e]=B[si], lt=t-s, S=SCENES[si];
+  const hk=ease(lt/0.25);
+  document.getElementById('head').innerHTML=`<span style="transform:scale(${0.7+0.3*hk});opacity:${hk}">${S.head}</span>`;
+  document.getElementById('art').innerHTML=S.draw(lt);
+  const ws=W.filter(w=>w.s===si);
+  document.getElementById('cap').innerHTML=ws.map(w=>{
+    const cls=t>=w.start&&t<w.end+0.05?'now':(t<w.start?'later':'');
+    return `<span class="w ${cls}">${w.text}</span>`;}).join(' ');
+  document.getElementById('src').textContent=si>=4?'장애인·노인·임산부 등의 편의증진 보장에 관한 법률 시행규칙 [별표 1]':'';
+};
+</script></body></html>

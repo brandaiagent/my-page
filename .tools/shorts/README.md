@@ -38,3 +38,10 @@
 - spec 에 `"bgm": "calm"` 을 넣으면 make-short.py 가 자동으로 깔고, 나레이션이 나올 때 음악을 낮춤(덕킹)
 - 외부 음악 API(Freesound CC0, Mubert 등)를 연결하면 그때 교체 가능
 - (갱신) 배경음악 기본 = Freesound CC0 보관함 `.music/<분위기>/` (music_library.py fill 로 채움, 곡 정보 .music/index.json). 직접 합성 bgm.py 는 사장님 평가로 기본에서 제외
+
+## v2 설명 애니메이션 쇼츠 (2026-11-28, 사장님 피드백: 여자 목소리 + 이어 말하기 + AI 티 빼기)
+- 나레이션: 대본 전체를 **한 번에** Typecast with-timestamps 로 생성(문장마다 끊지 않음 → 자연스러운 억양). 여자 목소리(나윤 기본), happy 1.15, 속도 1.1
+- 화면: 무료 영상 대신 `explainer/<주제>.html` 에 SVG로 직접 그린 장면(문장 1개 = 장면 1개, 말과 화면이 정확히 일치). 상단 큰 제목 + 하단 단어별 하이라이트 자막(단어 타이밍 사용)
+- 렌더: `node explainer/render.js explainer/<주제>.html words.json 프레임폴더`
+- 소리: 나레이션 + 밝은 배경음악(덕킹) + CC0 효과음(.music/sfx: ding·whoosh·pop·stamp — 장면 전환 whoosh, 강조 pop/stamp), 최종 loudnorm -14
+- 예시: explainer/elevator.html (엘리베이터 거울)
