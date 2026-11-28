@@ -68,9 +68,15 @@ def say_one(c: Typecast, text: str, prev: str, nxt: str, tempo: float, out: Path
 
 
 def cmd_tts(spec_path: str, workdir: str):
-    if not CONF.get("voice_id"):
-        sys.exit("typecast.json 에 voice_id 를 먼저 넣으세요 (python3 narration.py voices \"원하는 목소리\")")
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
+    pool = CONF.get("voices") or {}
+    if spec.get("voice") in pool:
+        CONF["voice_id"] = pool[spec["voice"]]
+    elif not CONF.get("voice_id") and pool:  # 이름 지정이 없으면 파일 이름 기준으로 돌아가며 고른다
+        names = sorted(pool); CONF["voice_id"] = pool[names[sum(map(ord, Path(spec_path).stem)) % len(names)]]
+    if not CONF.get("voice_id"):
+        sys.exit("typecast.json 에 voices 또는 voice_id 를 먼저 넣으세요")
+    print("목소리:", next((k for k, v in pool.items() if v == CONF["voice_id"]), CONF["voice_id"]))
     W = Path(workdir); W.mkdir(parents=True, exist_ok=True)
     scenes = spec["scenes"]; lines = [s.get("say", "") for s in scenes]
     c = client(); parts = []
