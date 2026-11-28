@@ -37,3 +37,4 @@
 - `bgm.py <upbeat|calm|curious|urgent> <길이> <출력.wav> [시드]` : 코드로 만든 우리 음악(외부 음원 없음). 시드(영상 이름)마다 멜로디가 달라짐
 - spec 에 `"bgm": "calm"` 을 넣으면 make-short.py 가 자동으로 깔고, 나레이션이 나올 때 음악을 낮춤(덕킹)
 - 외부 음악 API(Freesound CC0, Mubert 등)를 연결하면 그때 교체 가능
+- (갱신) 배경음악 기본 = Freesound CC0 보관함 `.music/<분위기>/` (music_library.py fill 로 채움, 곡 정보 .music/index.json). 직접 합성 bgm.py 는 사장님 평가로 기본에서 제외

@@ -26,16 +26,18 @@ subprocess.run(['rm','-rf',f"{W}/frames"]); subprocess.run(['node',f"{HERE}/kine
 NARR = any(sc.get('say') for sc in SP['scenes'])
 if NARR:
     subprocess.run(['python3',f"{HERE}/narration.py",'tts',spec_path,W],check=True)
-# 배경음악: spec 에 "bgm": "upbeat|calm|curious|urgent" 가 있으면 직접 합성한 음악을 깔고, 나레이션이 나올 때 음악을 낮춘다(덕킹)
+# 배경음악: spec 에 "bgm": "upbeat|calm|curious|urgent" 가 있으면 Freesound CC0 보관함(.music)에서 골라 깔고,
+# 나레이션이 나올 때 음악을 낮춘다(덕킹). 보관함에 곡이 없으면 음악 없이 (직접 합성 bgm.py 는 품질 문제로 기본 제외)
 BGM = SP.get('bgm')
-if BGM:
-    subprocess.run(['python3',f"{HERE}/bgm.py",BGM,str(T),f"{W}/bgm.wav",os.path.basename(spec_path)],check=True)
-    if NARR:
-        subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-i',f"{W}/narration.m4a",'-filter_complex',
-            "[0:a]loudnorm=I=-26:TP=-3,aresample=44100[m];[1:a]aresample=44100,asplit=2[v][sc];[m][sc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=300[md];[md][v]amix=inputs=2:normalize=0,alimiter=limit=0.89[out]",
-            '-map','[out]','-ac','2','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
-    else:
-        subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-af','loudnorm=I=-16:TP=-1.5','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
+if BGM and subprocess.run(['python3',f"{HERE}/music_library.py",'pick',BGM,str(T),f"{W}/bgm.wav",os.path.basename(spec_path)]).returncode != 0:
+    BGM = None
+if BGM and NARR:
+    subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-i',f"{W}/narration.m4a",'-filter_complex',
+        "[0:a]loudnorm=I=-26:TP=-3,aresample=44100[m];[1:a]aresample=44100,asplit=2[v][sc];[m][sc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=300[md];[md][v]amix=inputs=2:normalize=0,alimiter=limit=0.89[out]",
+        '-map','[out]','-ac','2','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
+    AUDIO_IN = ['-i',f"{W}/mix.m4a"]
+elif BGM:
+    subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-af','loudnorm=I=-16:TP=-1.5','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
     AUDIO_IN = ['-i',f"{W}/mix.m4a"]
 else:
     AUDIO_IN = ['-i',f"{W}/narration.m4a"] if NARR else ['-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo']
