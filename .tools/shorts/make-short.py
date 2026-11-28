@@ -25,6 +25,8 @@ subprocess.run(['rm','-rf',f"{W}/frames"]); subprocess.run(['node',f"{HERE}/kine
 subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bg.mp4",'-framerate','30','-i',f"{W}/frames/f%04d.png",'-f','lavfi','-t',str(T),'-i','color=c=0xffe033:s=1080x12:r=30','-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo',
   '-filter_complex',f"[0:v][1:v]overlay=0:0:shortest=1[a];[a]drawbox=x=0:y=70:w=1080:h=12:color=white@0.25:t=fill[b];[b][2:v]overlay=x='-1080+1080*t/{T}':y=70[v]",
   '-map','[v]','-map','3:a','-t',str(T),'-c:v','libx264','-preset','medium','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',out],check=True)
+# 썸네일용 표지 (첫 프레임 = 훅 완성 화면)
+subprocess.run(['ffmpeg','-v','error','-y','-ss','0.1','-i',out,'-frames:v','1','-q:v','2',out.rsplit('.',1)[0]+'_표지.jpg'])
 # 확인용 장면 시트
 from PIL import Image
 ts = [min(T-0.3, sc['s'] + (sc['e']-sc['s'])*0.8) for sc in SP['scenes']]

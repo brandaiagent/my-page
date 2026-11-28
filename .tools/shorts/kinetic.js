@@ -31,7 +31,7 @@ const SCENES = SPEC.scenes;
     const t = f / FPS;
     const sc = SCENES.find(s => t >= s.s && t < s.e) || SCENES[SCENES.length - 1];
     let h = '';
-    (sc.items || []).forEach(it => { const a = pop(t, it.at); const dx = it.shake ? shake(t, it.at + 0.15, 0.45) : 0;
+    (sc.items || []).forEach(it => { const a = (SPEC.instantHook !== false && sc === SCENES[0]) ? { o: 1, sc: 1 + 0.03 * Math.sin(t * 7) } : pop(t, it.at); const dx = it.shake ? shake(t, it.at + 0.15, 0.45) : 0;
       h += `<div class="l" style="top:${it.top}px;font-size:${it.size}px;opacity:${a.o};transform:translateX(${dx}px) scale(${a.sc})">${it.txt}</div>`; });
     (sc.rows || []).forEach(r => { const x = Math.max(0, Math.min(1, (t - r.at) / 0.25)); const e = 1 - Math.pow(1 - x, 3);
       h += `<div class="row" style="top:${r.top}px;opacity:${x > 0 ? 1 : 0};transform:translateX(${(1 - e) * 700}px)"><span class="k">${r.k}</span><span class="a">→</span><span class="v">${r.v}</span></div>`; });
@@ -40,7 +40,7 @@ const SCENES = SPEC.scenes;
       h += `<div style="position:absolute;left:330px;top:${1330}px;opacity:${k};font-size:58px;font-weight:900;color:#fff;-webkit-text-stroke:10px #000;paint-order:stroke fill;letter-spacing:-2px">여기 눌러보세요</div>`; }
     if (sc.small) { const x = Math.max(0, Math.min(1, (t - sc.small.at) / 0.3)); h += `<div class="small" style="top:${sc.small.top}px;opacity:${x}">${sc.small.txt}</div>`; }
     const fl = SCENES.some(s => t >= s.s && t < s.s + 0.07) ? 0.55 : 0;  // 장면 전환 순간 짧은 플래시
-    const tagO = t < (SPEC.tagEnd || SCENES[0].e) ? Math.min(1, t / 0.2) : 0;
+    const tagO = t < (SPEC.tagEnd || SCENES[0].e) ? 1 : 0;
     await p.evaluate(([h, fl, tagO]) => { document.getElementById('stage').innerHTML = h; document.getElementById('flash').style.opacity = fl; document.getElementById('tag').style.opacity = tagO; }, [h, fl, tagO]);
     await p.screenshot({ path: `${OUT}/f${String(f).padStart(4, '0')}.png`, omitBackground: true });
   }
