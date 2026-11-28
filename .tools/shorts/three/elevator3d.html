@@ -7,8 +7,8 @@ body{width:1080px;height:1920px;overflow:hidden;background:#000;font-family:'Not
 #t1{top:150px;color:#fff}#t2{top:272px;color:#ffd400}
 #view{position:absolute;left:0;top:470px;width:1080px;height:1080px}
 #ov{position:absolute;left:0;top:470px;width:1080px;height:1080px;pointer-events:none}
-#cap{position:absolute;left:50px;right:50px;top:1615px;text-align:center;font-weight:900;font-size:64px;line-height:1.34;letter-spacing:-2px;color:#fff}
-#cap .w{display:inline-block;margin:0 7px}#cap .now{color:#ffd400;transform:scale(1.08)}#cap .later{color:#6b6b6b}
+#cap{position:absolute;left:30px;right:30px;top:1570px;height:300px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;font-size:84px;line-height:1.2;letter-spacing:-3px;color:#fff;-webkit-text-stroke:14px #000;paint-order:stroke fill}
+#cap b{color:#ffd400;font-weight:900}#cap span{display:inline-block;transform-origin:50% 60%}
 #bar{position:absolute;left:0;top:0;height:10px;background:#ffd400}
 .bad,.ok,.q{position:absolute;font-weight:900;font-family:'Black Han Sans'}
 #src{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-size:26px;color:#8a8a8a}
@@ -117,14 +117,15 @@ const CHECK=`<svg width="240" height="240" viewBox="-120 -120 240 240"><circle r
 const LABEL=(t,c='#ffd400',fs=72)=>`<div style="font-family:'Black Han Sans';font-size:${fs}px;color:${c};-webkit-text-stroke:12px #000;paint-order:stroke fill;white-space:nowrap">${t}</div>`;
 // ---------- 장면 ----------
 function setScene(si,lt,L){
-  if(si===7){ setScene(6,4.6,4.5); // 마지막 장면 그대로 두고 좋아요·공유 요청
-    const pr=lt>1.8&&lt<2.15?.86:1, liked=lt>1.8, ic=liked?'#ffd400':'#fff';
+  if(si===7){ setScene(6,4.6,4.5); // 마지막 장면 그대로 두고 좋아요·공유 요청 (타이밍은 실제 단어 시각에서)
+    const wt=x=>{const w=WS.find(w=>w.s===7&&w.text.startsWith(x));return w?w.start-S7:0}, tL=wt('좋아요'), tK=wt('꾹'), tS=wt('공유');
+    const pr=lt>tK&&lt<tK+.3?.86:1, liked=lt>tK, ic=liked?'#ffd400':'#fff';
     const THUMB=`<div style="width:300px;height:300px;border-radius:50%;background:${liked?'#ff3b3b':'rgba(255,255,255,.16)'};border:10px solid ${ic};display:flex;align-items:center;justify-content:center;transform:scale(${pr})"><svg width="170" height="170" viewBox="0 0 24 24"><path fill="${ic}" d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6c-.4.4-.6.9-.6 1.4V19a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg></div>`;
     const SHARE=`<div style="width:240px;height:240px;border-radius:50%;background:#25c26e;border:10px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="130" height="130" viewBox="0 0 24 24"><path fill="#fff" d="M14 5v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7-7-7z"/></svg></div>`;
     ov.innerHTML=`<div style="position:absolute;inset:0;background:rgba(0,0,0,${.55*clamp(lt/.4)})"></div>`
       +stamp(LABEL('몰랐다면?','#fff',90),(lt-.2)/.4,540,140)
-      +stamp(THUMB,(lt-1.2)/.4,340,520)+stamp(LABEL('좋아요 꾹!','#ffd400',70),(lt-1.8)/.4,340,760)
-      +stamp(SHARE,(lt-4.3)/.4,770,540)+stamp(LABEL('친구에게 공유','#fff',62),(lt-4.5)/.4,770,760);
+      +stamp(THUMB,(lt-tL+.15)/.4,340,520)+stamp(LABEL('좋아요 꾹!','#ffd400',70),(lt-tK)/.4,340,760)
+      +stamp(SHARE,(lt-tS+.15)/.4,770,540)+stamp(LABEL('친구에게 공유','#fff',62),(lt-tS+.05)/.4,770,760);
     return; }
   const k=lt/L; let html='';
   p1.visible=p2.visible=false; meas.visible=false; ring.visible=false; wc.visible=true; wr.visible=true; front.visible=true; hall.visible=true;
@@ -165,11 +166,18 @@ function setScene(si,lt,L){
   dL.position.x=-.2-open*.38; dR.position.x=.2+open*.38;
   ov.innerHTML=html;
 }
-window.renderFrame=(t,W,B,T)=>{
+let CAPS=null,WS=[],S7=0;
+window.renderFrame=(t,W,B,T)=>{ WS=W; S7=B[7]?B[7][0]:0;
   document.getElementById('bar').style.width=(t/T*1080)+'px';
   let si=B.findIndex(b=>t<b[1]); if(si<0) si=B.length-1;
   const [s,e]=B[si]; setScene(si,t-s,e-s); cam.updateMatrixWorld(); updateMirror(); r.render(sc,cam);
-  document.getElementById('cap').innerHTML=W.filter(w=>w.s===si).map(w=>`<span class="w ${t>=w.start&&t<w.end+.05?'now':(t<w.start?'later':'')}">${w.text}</span>`).join(' ');
+  // 자막: 문장을 짧은 덩어리(쉼표 또는 약 11자)로 끊어 한 번에 한 덩어리만, 핵심 단어만 노란색
+  if(!CAPS){CAPS=[];let cur=[];W.forEach((w,i)=>{cur.push(w);const n=W[i+1],len=cur.map(x=>x.text).join('').length;
+    if(!n||n.s!==w.s||/[,.?!]$/.test(w.text)||len>=9){const tx=cur.map(x=>x.text).join(' ').replace(/[.]$/,''),pv=CAPS[CAPS.length-1];
+    if(pv&&pv.s===w.s&&tx.replace(/\s/g,'').length<=4&&!/,$/.test(pv.t)) pv.t+=' '+tx; else CAPS.push({t:tx,a:cur[0].start,s:w.s});cur=[];}});}
+  let c=null;for(const x of CAPS) if(t>=x.a-.05) c=x;
+  const KW=/(거울[을로]?|휠체어가|문[이을]|법으로도|뒷벽에|좋아요|공유해|비워)/g;
+  document.getElementById('cap').innerHTML=c?`<span style="transform:scale(${.9+.1*ease((t-c.a+.05)/.1)})">${c.t.replace(KW,'<b>$1</b>')}</span>`:'';
   document.getElementById('src').textContent=si>=4&&si<=5?'출처: 장애인·노인·임산부 등의 편의증진 보장에 관한 법률 시행규칙 [별표 1]':'';
 };
 window.ready=true;
