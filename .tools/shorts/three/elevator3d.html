@@ -1,0 +1,176 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&family=Black+Han+Sans&display=block" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#000;font-family:'Noto Sans KR';word-break:keep-all}
+#t1,#t2{position:absolute;left:0;right:0;text-align:center;font-family:'Black Han Sans';font-size:104px;letter-spacing:-1px}
+#t1{top:150px;color:#fff}#t2{top:272px;color:#ffd400}
+#view{position:absolute;left:0;top:470px;width:1080px;height:1080px}
+#ov{position:absolute;left:0;top:470px;width:1080px;height:1080px;pointer-events:none}
+#cap{position:absolute;left:50px;right:50px;top:1615px;text-align:center;font-weight:900;font-size:64px;line-height:1.34;letter-spacing:-2px;color:#fff}
+#cap .w{display:inline-block;margin:0 7px}#cap .now{color:#ffd400;transform:scale(1.08)}#cap .later{color:#6b6b6b}
+#bar{position:absolute;left:0;top:0;height:10px;background:#ffd400}
+.bad,.ok,.q{position:absolute;font-weight:900;font-family:'Black Han Sans'}
+#src{position:absolute;left:0;right:0;bottom:40px;text-align:center;font-size:26px;color:#8a8a8a}
+</style>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+</head><body>
+<div id="bar"></div><div id="t1">엘리베이터 거울</div><div id="t2">진짜 이유 아세요?</div>
+<canvas id="view" width="1080" height="1080"></canvas><div id="ov"></div><div id="cap"></div><div id="src"></div>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from './addons/RoomEnvironment.js';
+const cv=document.getElementById('view');
+const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+r.setSize(1080,1080,false);r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=1.05;r.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene();sc.background=new THREE.Color('#141820');
+const pm=new THREE.PMREMGenerator(r);sc.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;
+const cam=new THREE.PerspectiveCamera(42,1,0.05,60);
+sc.add(new THREE.HemisphereLight('#ffffff','#40485a',0.9));
+const key=new THREE.SpotLight('#fff6e8',60,12,0.9,0.5,1.4);key.position.set(0,4.2,0.4);key.target.position.set(0,0,-0.2);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-0.0004;sc.add(key,key.target);
+const M=(c,ro=.5,me=0)=>new THREE.MeshStandardMaterial({color:c,roughness:ro,metalness:me});
+let P=sc;const mesh=(g,m,p=[0,0,0],rot=[0,0,0],parent=P)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...rot);o.castShadow=o.receiveShadow=true;parent.add(o);return o};
+// ---------- 엘리베이터 카 (폭 1.6, 깊이 1.5, 높이 2.3) : 뒷벽 z=-0.75, 문 z=+0.75 ----------
+const CW=1.6,CD=1.5,CH=2.3;
+const steel=M('#c5ccd6',.28,.85), steelD=M('#9aa3b0',.32,.85), floorM=M('#3a3f48',.8,0);
+mesh(new THREE.BoxGeometry(CW+.1,.06,CD+.1),floorM,[0,-.03,0]);
+mesh(new THREE.BoxGeometry(CW,CH,.05),steel,[0,CH/2,-CD/2-.025]);
+const wl=mesh(new THREE.BoxGeometry(.05,CH,CD),steelD,[-CW/2-.025,CH/2,0]);
+const wr=mesh(new THREE.BoxGeometry(.05,CH,CD),steelD,[CW/2+.025,CH/2,0]);
+// 핸드레일
+mesh(new THREE.CylinderGeometry(.02,.02,CD-.2,12),M('#e8e8e8',.2,1),[-CW/2+.06,.9,0],[Math.PI/2,0,0]);
+mesh(new THREE.CylinderGeometry(.02,.02,CD-.2,12),M('#e8e8e8',.2,1),[CW/2-.06,.9,0],[Math.PI/2,0,0]);
+// 거울 (실제 반사) : 뒷벽, 바닥에서 0.6m 위부터
+const MB=0.6, MH=1.4, MWd=1.2;
+const rt=new THREE.WebGLRenderTarget(1024,1200,{samples:4});rt.texture.repeat.x=-1;rt.texture.offset.x=1;
+const mirror=new THREE.Mesh(new THREE.PlaneGeometry(MWd,MH),new THREE.MeshBasicMaterial({map:rt.texture,color:'#e4ebf2'}));
+const MZ=-CD/2+.008;mirror.position.set(0,MB+MH/2,MZ);sc.add(mirror);
+const mcam=new THREE.PerspectiveCamera();
+function updateMirror(){ // 거울 뒤 대칭 위치에서 거울 사각형을 창으로 하는 비대칭 원근 카메라
+  const P=cam.position, d=P.z-MZ; if(d<=.01) return;
+  mcam.position.set(P.x,P.y,MZ-d); mcam.rotation.set(0,Math.PI,0); mcam.updateMatrixWorld();
+  const x0=-MWd/2,x1=MWd/2,y0=MB,y1=MB+MH;
+  mcam.projectionMatrix.makePerspective(-(x1-P.x),-(x0-P.x),y1-P.y,y0-P.y,d,40);
+  mcam.projectionMatrixInverse.copy(mcam.projectionMatrix).invert();
+  mirror.visible=false; r.setRenderTarget(rt); r.render(sc,mcam); r.setRenderTarget(null); mirror.visible=true;
+}
+mesh(new THREE.BoxGeometry(MWd+.06,MH+.06,.01),M('#222',.4,.6),[0,MB+MH/2,-CD/2-.001]);
+// 앞벽(문 양옆)과 문
+const front=new THREE.Group();sc.add(front);
+mesh(new THREE.BoxGeometry(.4,CH,.05),steelD,[-CW/2+.2,CH/2,CD/2],[0,0,0],front);
+mesh(new THREE.BoxGeometry(.4,CH,.05),steelD,[CW/2-.2,CH/2,CD/2],[0,0,0],front);
+mesh(new THREE.BoxGeometry(CW,.25,.05),steelD,[0,CH-.125,CD/2],[0,0,0],front);
+const doorM=M('#d9b44a',.35,.75);
+const dL=mesh(new THREE.BoxGeometry(.4,CH-.25,.04),doorM,[-.2,(CH-.25)/2,CD/2+.03],[0,0,0],front);
+const dR=mesh(new THREE.BoxGeometry(.4,CH-.25,.04),doorM,[.2,(CH-.25)/2,CD/2+.03],[0,0,0],front);
+// 문 밖 복도 바닥(문이 열리면 보이도록)
+mesh(new THREE.BoxGeometry(4,.05,3),M('#8a7d6a',.9),[0,-.04,CD/2+1.5]);
+const hall=mesh(new THREE.BoxGeometry(4,3,.05),new THREE.MeshStandardMaterial({color:'#f6ead0',emissive:'#f6e2b8',emissiveIntensity:.55,roughness:.9}),[0,1.5,CD/2+1.3]);
+const hallLight=new THREE.PointLight('#ffe9c4',10,5);hallLight.position.set(0,2,CD/2+1);sc.add(hallLight);
+const eyes=(g,y,z)=>{for(const x of[-.045,.045]) mesh(new THREE.SphereGeometry(.018,10,10),M('#111',.3),[x,y,z],[0,0,0],g);};
+// ---------- 휠체어 + 탑승자 (앞 = -z 방향) ----------
+const wc=new THREE.Group();sc.add(wc);P=wc;
+const frame=M('#2b3446',.35,.8), seatM=M('#2f6df0',.5), tire=M('#111',.7), skin=M('#f1c7a0',.6), cloth=M('#ff8a3d',.6), pants=M('#30384a',.7);
+const wheel=(x)=>{const g=new THREE.Group();g.position.set(x,.3,.1);wc.add(g);
+  mesh(new THREE.TorusGeometry(.3,.03,14,48),tire,[0,0,0],[0,Math.PI/2,0],g);
+  for(let i=0;i<8;i++) mesh(new THREE.CylinderGeometry(.006,.006,.58,6),frame,[0,0,0],[i*Math.PI/8,0,0],g);
+  mesh(new THREE.TorusGeometry(.26,.012,8,40),frame,[x>0?.03:-.03,0,0],[0,Math.PI/2,0],g);};
+wheel(-.3);wheel(.3);
+mesh(new THREE.BoxGeometry(.5,.07,.46),seatM,[0,.5,0]);
+mesh(new THREE.BoxGeometry(.5,.5,.05),seatM,[0,.78,.24]);
+for(const x of[-.26,.26]){mesh(new THREE.CylinderGeometry(.015,.015,.9,8),frame,[x,.55,.27]);mesh(new THREE.CylinderGeometry(.015,.015,.5,8),frame,[x,.53,0],[Math.PI/2,0,0]);
+  mesh(new THREE.SphereGeometry(.05,12,12),tire,[x*.8,.05,-.32]);mesh(new THREE.CylinderGeometry(.012,.012,.12,8),frame,[x,1.02,.33],[Math.PI/2,0,0]);}
+mesh(new THREE.BoxGeometry(.4,.03,.14),frame,[0,.12,-.38]);
+// 탑승자
+mesh(new THREE.CapsuleGeometry(.17,.36,6,16),cloth,[0,.86,.1]);
+mesh(new THREE.SphereGeometry(.13,24,24),skin,[0,1.27,.06]);eyes(wc,1.29,-.065);
+mesh(new THREE.SphereGeometry(.135,24,24,0,Math.PI*2,0,Math.PI/2),M('#2a2018',.8),[0,1.3,.08]);
+for(const x of[-.1,.1]){mesh(new THREE.CapsuleGeometry(.065,.34,4,10),pants,[x,.58,-.12],[Math.PI/2,0,0]);mesh(new THREE.CapsuleGeometry(.06,.3,4,10),pants,[x,.32,-.3]);}
+for(const x of[-.22,.22]) mesh(new THREE.CapsuleGeometry(.05,.3,4,10),cloth,[x,.85,-.02],[.6,0,0]);
+P=sc;
+// ---------- 서 있는 사람 (마지막 장면·첫 장면) ----------
+const person=(col)=>{const g=new THREE.Group();sc.add(g);
+  mesh(new THREE.CapsuleGeometry(.18,.6,6,16),M(col,.6),[0,1.05,0],[0,0,0],g);
+  mesh(new THREE.SphereGeometry(.13,24,24),skin,[0,1.62,0],[0,0,0],g);eyes(g,1.64,-.125);
+  mesh(new THREE.SphereGeometry(.135,24,24,0,Math.PI*2,0,Math.PI/2),M('#2a2018',.8),[0,1.65,.02],[0,0,0],g);
+  for(const x of[-.08,.08]) mesh(new THREE.CapsuleGeometry(.07,.55,4,10),pants,[x,.4,0],[0,0,0],g);
+  return g;};
+const p1=person('#5ab07a'), p2=person('#e2627d');
+// 높이 표시(0.6m)
+const meas=new THREE.Group();sc.add(meas);
+const red=new THREE.MeshBasicMaterial({color:'#ff3b3b'});
+mesh(new THREE.BoxGeometry(.03,MB,.03),red,[-.75,MB/2,-CD/2+.06],[0,0,0],meas);
+mesh(new THREE.BoxGeometry(.18,.03,.03),red,[-.75,.02,-CD/2+.06],[0,0,0],meas);
+mesh(new THREE.BoxGeometry(.18,.03,.03),red,[-.75,MB,-CD/2+.06],[0,0,0],meas);
+// 회전 반경 원
+const ring=new THREE.Mesh(new THREE.RingGeometry(.84,.92,64),new THREE.MeshBasicMaterial({color:'#ff3b3b',transparent:true,opacity:.9,side:THREE.DoubleSide}));
+ring.rotation.x=-Math.PI/2;ring.position.y=.01;sc.add(ring);
+// ---------- 유틸 ----------
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ease=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2};
+const lerp=(a,b,k)=>a+(b-a)*k, V=(a,b,k)=>new THREE.Vector3(lerp(a[0],b[0],k),lerp(a[1],b[1],k),lerp(a[2],b[2],k));
+const camTo=(p,l)=>{cam.position.copy(p);cam.lookAt(l);};
+const ov=document.getElementById('ov');
+const stamp=(html,k,x,y,rot=0)=>k<=0?'':`<div style="position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${rot}deg) scale(${1.5-.5*ease(k*2)});opacity:${clamp(k*4)}">${html}</div>`;
+const XMARK=`<svg width="260" height="260" viewBox="-130 -130 260 260"><circle r="110" fill="none" stroke="#ff3b3b" stroke-width="24"/><path d="M-62 -62 L62 62 M62 -62 L-62 62" stroke="#ff3b3b" stroke-width="24" stroke-linecap="round"/></svg>`;
+const CHECK=`<svg width="240" height="240" viewBox="-120 -120 240 240"><circle r="105" fill="#25c26e"/><path d="M-48 0 L-12 36 L52 -38" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const LABEL=(t,c='#ffd400',fs=72)=>`<div style="font-family:'Black Han Sans';font-size:${fs}px;color:${c};-webkit-text-stroke:12px #000;paint-order:stroke fill;white-space:nowrap">${t}</div>`;
+// ---------- 장면 ----------
+function setScene(si,lt,L){
+  if(si===7){ setScene(6,4.6,4.5); // 마지막 장면 그대로 두고 좋아요·공유 요청
+    const pr=lt>1.8&&lt<2.15?.86:1, liked=lt>1.8, ic=liked?'#ffd400':'#fff';
+    const THUMB=`<div style="width:300px;height:300px;border-radius:50%;background:${liked?'#ff3b3b':'rgba(255,255,255,.16)'};border:10px solid ${ic};display:flex;align-items:center;justify-content:center;transform:scale(${pr})"><svg width="170" height="170" viewBox="0 0 24 24"><path fill="${ic}" d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6c-.4.4-.6.9-.6 1.4V19a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg></div>`;
+    const SHARE=`<div style="width:240px;height:240px;border-radius:50%;background:#25c26e;border:10px solid #fff;display:flex;align-items:center;justify-content:center"><svg width="130" height="130" viewBox="0 0 24 24"><path fill="#fff" d="M14 5v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7-7-7z"/></svg></div>`;
+    ov.innerHTML=`<div style="position:absolute;inset:0;background:rgba(0,0,0,${.55*clamp(lt/.4)})"></div>`
+      +stamp(LABEL('몰랐다면?','#fff',90),(lt-.2)/.4,540,140)
+      +stamp(THUMB,(lt-1.2)/.4,340,520)+stamp(LABEL('좋아요 꾹!','#ffd400',70),(lt-1.8)/.4,340,760)
+      +stamp(SHARE,(lt-4.3)/.4,770,540)+stamp(LABEL('친구에게 공유','#fff',62),(lt-4.5)/.4,770,760);
+    return; }
+  const k=lt/L; let html='';
+  p1.visible=p2.visible=false; meas.visible=false; ring.visible=false; wc.visible=true; wr.visible=true; front.visible=true; hall.visible=true;
+  let open=0;
+  if(si===0){ // 서 있는 사람이 거울을 보지만 → X
+    wc.visible=false; p1.visible=true; p1.position.set(-.3,0,-.35); p1.rotation.y=0;
+    camTo(V([.55,1.6,.68],[.4,1.55,.45],ease(k)),new THREE.Vector3(-.1,1.35,-.75));
+    html=stamp(LABEL('얼굴 보는 용?','#fff',84),(lt-.2)/.5,540,170)+stamp(XMARK,(lt-1.1)/.6,540,560);
+  } else if(si===1){ // 위에서: 휠체어가 돌려다 막힘
+    wc.position.set(0,0,0); wc.rotation.y=Math.sin(lt*5)*0.5*clamp(lt/.5)*(lt<2.2?1:0);
+    ring.visible=true; ring.position.set(0,.01,0); ring.material.opacity=.5+.4*Math.sin(lt*8);
+    camTo(V([0,4.2,1.1],[0,3.6,0.9],ease(k)),new THREE.Vector3(0,0,0));
+    html=stamp(LABEL('회전 공간 부족','#ff3b3b',78),(lt-.3)/.5,540,130)+stamp(XMARK,(lt-1.6)/.6,860,880);
+  } else if(si===2){ // 휠체어 뒤(문 쪽)에서: 앞은 거울, 문은 뒤
+    wc.position.set(0,0,.05); wc.rotation.y=0;
+    camTo(V([.32,1.7,.7],[.28,1.65,.62],ease(k)),new THREE.Vector3(-.05,1.05,-.75));
+    html=stamp(LABEL('문이 안 보여요','#fff',78),(lt-.4)/.5,540,130)+stamp(`<div style="font-family:'Black Han Sans';font-size:220px;color:#ff3b3b;-webkit-text-stroke:14px #000;paint-order:stroke fill">?</div>`,(lt-1.4)/.5,900,820);
+  } else if(si===3){ // 거울 속에 문이 열리는 게 보임
+    wc.position.set(0,0,.05); open=ease((lt-.5)/1.2);
+    camTo(V([.3,1.72,.62],[.14,1.62,.3],ease(k)),new THREE.Vector3(0,1.25,-.75));
+    html=stamp(LABEL('거울로 문 확인!','#ffd400',82),(lt-.2)/.5,540,130)+stamp(CHECK,(lt-1.5)/.5,880,860);
+  } else if(si===4){ // 밖으로 빠지며 법 조항
+    wc.position.set(0,0,.05+ease(k)*.5); open=1; wr.visible=false;
+    camTo(V([2.5,1.9,.6],[3.0,2.2,.9],ease(k)),new THREE.Vector3(0,1,0));
+    html=stamp(`<div style="background:#fff;border-radius:22px;padding:26px 40px;font-weight:900;font-size:46px;color:#111;box-shadow:0 10px 0 #ffd400">편의증진법 시행규칙<br><span style="color:#ff3b3b;font-size:64px">거울 설치 의무</span></div>`,(lt-.3)/.4,540,820,-4);
+  } else if(si===5){ // 옆에서: 거울 높이 0.6m
+    wc.visible=false; meas.visible=true; wr.visible=false;
+    camTo(V([1.9,1.1,.7],[1.6,1.0,.45],ease(k)),new THREE.Vector3(-.3,.75,-.75));
+    html=stamp(LABEL('바닥에서 0.6m 이상','#ffd400',76),(lt-.4)/.5,540,130);
+  } else { // 마지막: 사람들이 비켜서고 휠체어가 들어감
+    open=1; p1.visible=p2.visible=true; const s=ease(lt/1.2);
+    p1.position.set(lerp(-.15,-.55,s),0,-.3); p1.rotation.y=Math.PI+lerp(0,.3,s);
+    p2.position.set(lerp(.15,.55,s),0,-.3); p2.rotation.y=Math.PI-lerp(0,.3,s);
+    wc.position.set(0,0,lerp(1.9,.25,ease((lt-.6)/1.8))); wc.rotation.y=0; front.visible=false; hall.visible=false;
+    camTo(V([.0,3.0,2.6],[.0,2.7,2.2],ease(k)),new THREE.Vector3(0,.7,-.1));
+    html=stamp(LABEL('거울 앞은 비워 주세요','#ffd400',74),(lt-.3)/.5,540,130)+stamp(`<svg width="200" height="180" viewBox="0 0 200 180"><path d="M100 170 L20 90 A50 50 0 0 1 100 30 A50 50 0 0 1 180 90 Z" fill="#ff3b6b" stroke="#000" stroke-width="10"/></svg>`,(lt-1.8)/.5,540,330);
+  }
+  dL.position.x=-.2-open*.38; dR.position.x=.2+open*.38;
+  ov.innerHTML=html;
+}
+window.renderFrame=(t,W,B,T)=>{
+  document.getElementById('bar').style.width=(t/T*1080)+'px';
+  let si=B.findIndex(b=>t<b[1]); if(si<0) si=B.length-1;
+  const [s,e]=B[si]; setScene(si,t-s,e-s); cam.updateMatrixWorld(); updateMirror(); r.render(sc,cam);
+  document.getElementById('cap').innerHTML=W.filter(w=>w.s===si).map(w=>`<span class="w ${t>=w.start&&t<w.end+.05?'now':(t<w.start?'later':'')}">${w.text}</span>`).join(' ');
+  document.getElementById('src').textContent=si>=4&&si<=5?'출처: 장애인·노인·임산부 등의 편의증진 보장에 관한 법률 시행규칙 [별표 1]':'';
+};
+window.ready=true;
+</script></body></html>
