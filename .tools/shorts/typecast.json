@@ -1,0 +1,7 @@
+{
+  "_설명": "쇼츠 나레이션 설정. API 키는 넣지 않는다(환경 변수 TYPECAST_API_KEY 또는 세션 네트워크 비밀).",
+  "voice_id": null,
+  "model": "ssfm-v31",
+  "language": "kor",
+  "tempo": 1.1
+}

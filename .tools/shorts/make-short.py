@@ -22,7 +22,12 @@ for i, g in enumerate(SP['segs']):
 open(f"{W}/list.txt",'w').write('\n'.join(f"file '{os.path.abspath(f)}'" for f in files))
 subprocess.run(['ffmpeg','-y','-v','error','-f','concat','-safe','0','-i',f"{W}/list.txt",'-c','copy',f"{W}/bg.mp4"],check=True)
 subprocess.run(['rm','-rf',f"{W}/frames"]); subprocess.run(['node',f"{HERE}/kinetic.js",spec_path,f"{W}/frames"],check=True)
-subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bg.mp4",'-framerate','30','-i',f"{W}/frames/f%04d.png",'-f','lavfi','-t',str(T),'-i','color=c=0xffe033:s=1080x12:r=30','-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo',
+# 나레이션: 장면에 "say" 가 있으면 Typecast 로 음성 트랙을 만들고, 없으면 무음 트랙
+NARR = any(sc.get('say') for sc in SP['scenes'])
+if NARR:
+    subprocess.run(['python3',f"{HERE}/narration.py",'tts',spec_path,W],check=True)
+AUDIO_IN = ['-i',f"{W}/narration.m4a"] if NARR else ['-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo']
+subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bg.mp4",'-framerate','30','-i',f"{W}/frames/f%04d.png",'-f','lavfi','-t',str(T),'-i','color=c=0xffe033:s=1080x12:r=30',*AUDIO_IN,
   '-filter_complex',f"[0:v][1:v]overlay=0:0:shortest=1[a];[a]drawbox=x=0:y=70:w=1080:h=12:color=white@0.25:t=fill[b];[b][2:v]overlay=x='-1080+1080*t/{T}':y=70[v]",
   '-map','[v]','-map','3:a','-t',str(T),'-c:v','libx264','-preset','medium','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',out],check=True)
 # 썸네일용 표지 (첫 프레임 = 훅 완성 화면)
