@@ -6,7 +6,7 @@ category: "생활가전"
 description: "겨울철 실내는 온도 18~20℃, 습도 40~50%가 적정 기준입니다. 질병관리청 한파 건강수칙 기준과 함께 가습기를 켜고 끄는 시점, 환기 횟수, 습도를 잴 때 주의할 점을 정리했습니다."
 affiliate: true
 ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
-image: /images/winter-indoor-humidity-humidifier-thumb.webp
+image: /images/winter-indoor-humidity-humidifier-thumb-v2.webp
 keyword: "겨울 실내 적정 습도"
 related: "겨울 적정 실내온도, 가습기 습도 설정, 습도 40 50, 겨울 환기 횟수, 온습도계"
 intent: "정보 탐색형"

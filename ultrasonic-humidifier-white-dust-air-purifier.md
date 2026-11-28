@@ -6,7 +6,7 @@ category: "생활가전"
 description: "가구 위 흰 가루와 갑자기 오른 공기청정기 미세먼지 수치는 대부분 초음파 가습기가 뿜는 수돗물 속 미네랄 탓입니다. 제조사 안내 기준의 원인, 거리 2.5m, 물 선택, 필터 관리 순서를 정리했습니다."
 affiliate: true
 ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
-image: /images/ultrasonic-humidifier-white-dust-air-purifier-thumb.webp
+image: /images/ultrasonic-humidifier-white-dust-air-purifier-thumb-v2.webp
 keyword: "가습기 흰가루"
 related: "초음파 가습기 백분, 가습기 공기청정기 같이, 공기청정기 미세먼지 수치 높음, 가습기 정수기 물, 자연기화식 가습기"
 intent: "문제 해결형"

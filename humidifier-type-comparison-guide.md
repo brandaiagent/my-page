@@ -5,7 +5,7 @@ updated: 2026-11-27T01:30:00
 category: "생활가전"
 description: "한국소비자원 가습기 13개 제품 비교 결과를 바탕으로 초음파·가열·복합·기화식의 가습량, 연간 유지관리비, 소음, 화상 주의점을 정리했습니다."
 affiliate: true
-image: /images/humidifier-type-comparison-guide-thumb.webp
+image: /images/humidifier-type-comparison-guide-thumb-v2.webp
 ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
 ---
 가습기는 방식에 따라 가습량, 1년 유지비, 소음이 크게 다릅니다. 한국소비자원이 2025년 10월 30일 발표한 13개 제품 비교 결과를 보면 가습량은 제품 간 최대 3.3배, 연간 유지관리비는 최대 40배 넘게 차이가 났습니다. 그래서 "어떤 방식이 제일 좋다"보다 **쓰려는 방 크기와 어디에 둘지**를 먼저 정하는 게 맞습니다.

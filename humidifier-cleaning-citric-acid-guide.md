@@ -6,7 +6,7 @@ category: "생활가전"
 description: "가습기는 물을 매일 갈고, 물때는 구연산 희석액(물 10L에 30g)에 30분 이상 불려 닦은 뒤 그늘에서 완전히 말리면 됩니다. 제조사 안내 기준의 세척 순서와 주의할 점을 정리했습니다."
 affiliate: true
 ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
-image: /images/humidifier-cleaning-citric-acid-guide-thumb.webp
+image: /images/humidifier-cleaning-citric-acid-guide-thumb-v2.webp
 keyword: "가습기 세척 방법"
 related: "가습기 구연산 세척, 가습기 식초 세척, 가습기 물때, 가습기 물 교체, 가습기 냄새"
 intent: "문제 해결형"
