@@ -45,3 +45,10 @@
 - 렌더: `node explainer/render.js explainer/<주제>.html words.json 프레임폴더`
 - 소리: 나레이션 + 밝은 배경음악(덕킹) + CC0 효과음(.music/sfx: ding·whoosh·pop·stamp — 장면 전환 whoosh, 강조 pop/stamp), 최종 loudnorm -14
 - 예시: explainer/elevator.html (엘리베이터 거울)
+
+## v3 표준 (2026-11-28 사장님 OK: 엘리베이터거울_3D_v2)
+- 화면: 템플릿 A (검은 배경, 위 2줄 제목 흰색+노랑, 가운데 1080×1080 3D 장면, 아래 자막). 장면은 `three/elevator3d.html` 을 본떠 만들고 `node three/render3d.js 장면.html words.json 출력폴더 30` 으로 렌더.
+- 목소리: 남자 '도윤', 대본 전체를 한 번에 `text_to_speech_with_timestamps` (끊김 없이), happy 1.15 · tempo 1.1.
+- 배경음악 없음. 효과음(ding·whoosh·pop·stamp)만 장면 사건에 맞춰 넣고 loudnorm -14.
+- 자막: 짧은 덩어리(쉼표 또는 약 9자) 하나씩, 흰 글씨 + 검은 테두리, 핵심어만 노란색. 단어별 하이라이트·회색 미리보기 금지(AI 티).
+- 끝: 좋아요·공유 부탁 멘트 + 좋아요 버튼 누르기·공유 아이콘 연출.
