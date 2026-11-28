@@ -17,7 +17,7 @@ import json, os, subprocess, sys
 from pathlib import Path
 
 from typecast import Typecast
-from typecast.models import TTSRequest, SmartPrompt, Output
+from typecast.models import TTSRequest, SmartPrompt, PresetPrompt, Output
 
 HERE = Path(__file__).resolve().parent
 CONF = json.loads((HERE / "typecast.json").read_text(encoding="utf-8"))
@@ -59,9 +59,13 @@ def cmd_sub():
 
 
 def say_one(c: Typecast, text: str, prev: str, nxt: str, tempo: float, out: Path):
+    # 감정: CONF["emotion"] 이 있으면 고정 감정(happy·toneup 등, 세기 0~2), 없으면 문맥으로 추론(smart)
+    emo = CONF.get("emotion")
+    prompt = (PresetPrompt(emotion_preset=emo, emotion_intensity=CONF.get("emotion_intensity", 1.3)) if emo
+              else SmartPrompt(emotion_type="smart", previous_text=prev or None, next_text=nxt or None))
     req = TTSRequest(
         text=text, model=CONF["model"], voice_id=CONF["voice_id"], language=CONF.get("language", "kor"),
-        prompt=SmartPrompt(emotion_type="smart", previous_text=prev or None, next_text=nxt or None),
+        prompt=prompt,
         output=Output(audio_tempo=tempo, audio_format="wav"),
     )
     out.write_bytes(c.text_to_speech(req).audio_data)
@@ -69,6 +73,8 @@ def say_one(c: Typecast, text: str, prev: str, nxt: str, tempo: float, out: Path
 
 def cmd_tts(spec_path: str, workdir: str):
     spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
+    for k in ("emotion", "emotion_intensity", "tempo"):  # spec 이 설정 파일 값을 덮어씀
+        if k in spec: CONF[k] = spec[k]
     pool = CONF.get("voices") or {}
     if spec.get("voice") in pool:
         CONF["voice_id"] = pool[spec["voice"]]
