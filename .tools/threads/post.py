@@ -11,7 +11,8 @@
 글.json 예:
   {"text": "본문 (500자 이하)",
    "image_url": "https://brandaihub.com/images/xxx.webp",   # 선택. 공개 URL 이어야 함 (JPEG/PNG 권장)
-   "reply": "첫 댓글 (링크 등, 선택)",
+   "replies": ["댓글 1", "댓글 2"],                # 선택. 본인 댓글로 이어 쓰기(각 댓글은 바로 앞 글에 연결)
+   "reply": "첫 댓글 (예전 형식, replies 와 같은 역할)",
    "ad": true}                                    # 제휴 글이면 true → 본문·댓글 맨 앞에 [광고] 표시 자동 추가
 """
 import json, sys, time, urllib.parse, urllib.request
@@ -65,18 +66,24 @@ def publish(text, image_url=None, reply_to=None, dry=False):
 
 def cmd_post(path, dry):
     g = json.load(open(path, encoding="utf-8"))
-    text, reply = g["text"].strip(), (g.get("reply") or "").strip()
+    text = g["text"].strip()
+    replies = [x.strip() for x in (g.get("replies") or ([g["reply"]] if g.get("reply") else [])) if x.strip()]
     if g.get("ad"):
         text = f"{AD_LINE}\n\n{text}"
-        if reply:
-            reply = f"[광고] {reply}"
-    if len(text) > 500:
-        raise SystemExit(f"본문이 500자를 넘어요: {len(text)}자")
+        replies = [f"[광고] {x}" if ("http" in x) else x for x in replies]
+    for t in [text] + replies:
+        if len(t) > 500:
+            raise SystemExit(f"500자를 넘는 글이 있어요: {len(t)}자")
     r = publish(text, g.get("image_url"), dry=dry)
-    out = {"post": r}
-    if reply and not dry:
+    out = {"post": r, "replies": []}
+    prev = r.get("id")
+    for x in replies:
+        if dry:
+            break
         time.sleep(5)
-        out["reply"] = publish(reply, reply_to=r["id"])
+        rr = publish(x, reply_to=prev)
+        out["replies"].append(rr)
+        prev = rr["id"]
     if not dry:
         out["permalink"] = call("GET", r["id"], fields="permalink").get("permalink")
     print(json.dumps(out, ensure_ascii=False))
