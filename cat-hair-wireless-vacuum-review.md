@@ -6,7 +6,7 @@ category: "생활가전"
 description: "고양이 털이 많은 집에서 무선청소기를 고를 때 확인할 브러시 구조, 먼지통·필터 관리, 장단점과 관리 요령을 정리했습니다."
 affiliate: true
 ad_notice: "이 글에는 제휴 링크가 포함되어 있으며, 링크를 통한 구매나 가입 등에 따라 Brand Ai Agent가 수수료를 받습니다."
-image: /images/cat-hair-vacuum-guide-thumb-v2.webp
+image: /images/cat-hair-vacuum-guide-thumb-v3.webp
 ---
 고양이 털 때문에 무선청소기 구입을 고민하고 계시나요? 결론부터 말씀드리면, 하루에도 몇 번씩 날리는 털을 수시로 치우기에는 무선청소기가 필수적이지만 털 특유의 엉킴과 필터 관리는 꾸준히 신경 써야 합니다.
 
