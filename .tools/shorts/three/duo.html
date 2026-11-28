@@ -1,0 +1,84 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&family=Black+Han+Sans&display=block" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#000;font-family:'Noto Sans KR';word-break:keep-all}
+#view{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#ov{position:absolute;inset:0;pointer-events:none}
+/* 자막: 안전 영역(위 230px, 아래 450px, 오른쪽 150px 피함) */
+.cap{position:absolute;left:40px;right:170px;top:1180px;text-align:center;font-weight:900;font-size:80px;line-height:1.22;letter-spacing:-3px;color:#fff;-webkit-text-stroke:15px #111;paint-order:stroke fill}
+.cap b{color:#ffd400}
+.who{display:inline-block;font-size:40px;padding:4px 18px;border-radius:14px;margin-bottom:8px;-webkit-text-stroke:0;color:#fff;letter-spacing:-1px}
+.sfx{position:absolute;font-family:'Black Han Sans';color:#ffd400;-webkit-text-stroke:16px #111;paint-order:stroke fill}
+.tag{position:absolute;left:50px;top:260px;background:#ffd400;border:6px solid #111;border-radius:22px;padding:10px 26px;font-family:'Black Han Sans';font-size:58px;color:#111;transform:rotate(-2deg)}
+.safe{position:absolute;background:rgba(255,0,0,.18);border:3px dashed rgba(255,0,0,.8)}
+</style>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+</head><body>
+<canvas id="view" width="1080" height="1920"></canvas><div id="ov"></div>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from './addons/RoomEnvironment.js';
+const cv=document.getElementById('view');
+const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+r.setSize(1080,1920,false);r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=.85;r.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene();sc.background=new THREE.Color('#cfdbe8');
+sc.environment=new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(),0.04).texture;
+const cam=new THREE.PerspectiveCamera(32,1080/1920,.05,60);
+sc.add(new THREE.HemisphereLight('#ffffff','#8a93a6',.8));
+const key=new THREE.SpotLight('#fff6e8',70,14,.8,.5,1.3);key.position.set(1.5,5,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0004;sc.add(key);
+const M=(c,ro=.55,me=0)=>new THREE.MeshStandardMaterial({color:c,roughness:ro,metalness:me});
+const mesh=(g,m,p=[0,0,0],rot=[0,0,0],parent=sc)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...rot);o.castShadow=o.receiveShadow=true;parent.add(o);return o};
+// 방: 바닥 + 뒷벽 + 책상
+mesh(new THREE.PlaneGeometry(20,20),M('#c9b59a',.8),[0,0,0],[-Math.PI/2,0,0]);
+mesh(new THREE.PlaneGeometry(20,10),M('#eef2f6',.9),[0,5,-2.5]);
+// 엘리베이터 영상과 같은 스타일의 인물 (민머리 + 표정)
+const skin=M('#f1c7a0',.6);
+function person(col,x){
+  const g=new THREE.Group();g.position.set(x,0,0);sc.add(g);
+  mesh(new THREE.CapsuleGeometry(.24,.55,6,16),M(col,.6),[0,1.0,0],[0,0,0],g);                // 몸
+  for(const s of[-1,1]) mesh(new THREE.CapsuleGeometry(.08,.5,4,10),M('#30384a',.7),[s*.1,.38,0],[0,0,0],g); // 다리
+  const head=new THREE.Group();head.position.set(0,1.68,0);g.add(head);
+  mesh(new THREE.SphereGeometry(.22,32,32),skin,[0,0,0],[0,0,0],head);                          // 민머리
+  const face={};
+  face.eyes=[-1,1].map(s=>mesh(new THREE.SphereGeometry(.028,12,12),M('#111',.3),[s*.075,.03,.2],[0,0,0],head));
+  face.brows=[-1,1].map(s=>mesh(new THREE.BoxGeometry(.075,.016,.016),M('#2a1a10',.6),[s*.075,.1,.205],[0,0,0],head));
+  face.mouth=mesh(new THREE.TorusGeometry(.04,.011,8,20,Math.PI),M('#7a2f22',.5),[0,-.075,.205],[0,0,Math.PI],head);
+  face.mouthO=mesh(new THREE.SphereGeometry(.035,16,16),M('#5a1f18',.5),[0,-.08,.2],[0,0,0],head);face.mouthO.scale.set(1,1.3,.5);face.mouthO.visible=false;
+  const arms=[-1,1].map(s=>{const a=new THREE.Group();a.position.set(s*.28,1.22,0);g.add(a);mesh(new THREE.CapsuleGeometry(.065,.42,4,10),M(col,.6),[0,-.25,0],[0,0,0],a);a.rotation.z=s*.25;return a});
+  return {g,head,face,arms};
+}
+// 표정: smile / smug / shock / angry / flat
+function expr(p,e){
+  const f=p.face;f.mouth.visible=true;f.mouthO.visible=false;f.mouth.rotation.z=Math.PI;f.mouth.scale.set(1,1,1);
+  f.eyes.forEach(o=>o.scale.set(1,1,1));
+  const B=(tilt,y)=>f.brows.forEach((b,i)=>{const s=i?1:-1;b.rotation.z=s*tilt;b.position.y=y});
+  if(e==='smile'){B(0,.1)}
+  if(e==='smug'){B(-.25,.11);f.mouth.scale.set(1.3,.8,1)}
+  if(e==='shock'){B(0,.135);f.eyes.forEach(o=>o.scale.set(1.6,1.6,1.6));f.mouth.visible=false;f.mouthO.visible=true}
+  if(e==='angry'){B(.45,.09);f.mouth.rotation.z=0;f.mouth.position.y=-.09}
+  if(e==='flat'){B(.12,.095);f.mouth.scale.set(1.1,.25,1)}
+}
+const heo=person('#ff8a3d',-.36), ddok=person('#4f7dff',.36);
+heo.g.rotation.y=.35;ddok.g.rotation.y=-.35;
+// 볼펜 (허당 손)
+const pen=new THREE.Group();mesh(new THREE.CylinderGeometry(.018,.018,.3,16),M('#f4f4f4',.4),[0,0,0],[0,0,0],pen);mesh(new THREE.CylinderGeometry(.022,.022,.09,16),M('#2f6df0',.4),[0,.13,0],[0,0,0],pen);
+pen.position.set(0,-.5,.06);heo.arms[1].add(pen);heo.arms[1].rotation.set(-1.1,0,-.3);
+const P=new URLSearchParams(location.search);
+expr(heo,P.get('h')||'smug');expr(ddok,P.get('d')||'angry');
+cam.position.set(.12,1.55,4.7);cam.lookAt(.12,1.2,0);
+const ov=document.getElementById('ov');
+const line=P.get('line')||'2';
+const LINES={
+ '1':{who:'허당',c:'#ff8a3d',t:'볼펜 뚜껑 구멍<br>왜 있는지 앎?'},
+ '2':{who:'허당',c:'#ff8a3d',t:'잉크 마르지 말라고~ ㅋ'},
+ '3':{who:'똑순이',c:'#4f7dff',t:'<b>개소리</b> 하지 마.'},
+};
+const L=LINES[line];
+ov.innerHTML=`<div class="tag">볼펜 뚜껑 구멍, 진짜 이유?</div>
+ ${line==='3'?'<div class="sfx" style="left:470px;top:300px;font-size:150px;transform:rotate(12deg)">땡!</div>':''}
+ <div class="cap"><span class="who" style="background:${L.c}">${L.who}</span><br>${L.t}</div>`
+ +(P.get('safe')?`<div class="safe" style="left:0;top:0;width:1080px;height:230px"></div><div class="safe" style="left:0;top:1470px;width:1080px;height:450px"></div><div class="safe" style="left:930px;top:230px;width:150px;height:1240px"></div>`:'');
+r.render(sc,cam);window.ready=true;
+</script></body></html>

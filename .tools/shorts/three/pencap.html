@@ -1,0 +1,191 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&family=Black+Han+Sans&display=block" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#000;font-family:'Noto Sans KR';word-break:keep-all}
+#view{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#ov{position:absolute;inset:0;pointer-events:none}
+#flash{position:absolute;inset:0;background:#ff2d2d;opacity:0}
+/* 제목: 원래 방식(흰 줄 + 노란 줄), 앱 버튼에 안 가리게 250px 아래부터 */
+.tt{position:absolute;left:0;right:0;text-align:center;font-family:'Black Han Sans';font-size:100px;letter-spacing:-2px;-webkit-text-stroke:16px #000;paint-order:stroke fill}
+#t1{top:250px;color:#fff}#t2{top:368px;color:#ffd400}
+.cap{position:absolute;left:40px;right:170px;top:1190px;text-align:center;font-weight:900;font-size:76px;line-height:1.22;letter-spacing:-3px;color:#fff;-webkit-text-stroke:15px #111;paint-order:stroke fill}
+.cap b{color:#ffd400}
+.who{display:inline-block;font-size:40px;padding:4px 20px;border-radius:14px;margin-bottom:10px;-webkit-text-stroke:0;color:#fff;letter-spacing:-1px}
+.sfx{position:absolute;font-family:'Black Han Sans';color:#ffd400;-webkit-text-stroke:16px #111;paint-order:stroke fill;white-space:nowrap}
+.card{position:absolute;left:90px;right:190px;top:640px;background:#fff;border:8px solid #111;border-radius:30px;padding:34px 30px;text-align:center;box-shadow:12px 14px 0 rgba(0,0,0,.25)}
+.card .a{font-family:'Black Han Sans';font-size:64px;color:#2f6df0}.card .b{font-weight:900;font-size:56px;color:#111;margin-top:10px}.card .b span{color:#e0262b}
+</style>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+</head><body>
+<canvas id="view" width="1080" height="1920"></canvas><div id="flash"></div><div id="ov"></div>
+<div class="tt" id="t1">볼펜 뚜껑 구멍</div><div class="tt" id="t2">진짜 이유 아세요?</div>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from './addons/RoomEnvironment.js';
+const cv=document.getElementById('view');
+const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+r.setSize(1080,1920,false);r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+r.toneMapping=THREE.ACESFilmicToneMapping;r.toneMappingExposure=.85;r.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene();sc.background=new THREE.Color('#cfdbe8');
+sc.environment=new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(),0.04).texture;
+const cam=new THREE.PerspectiveCamera(32,1080/1920,.02,60);
+sc.add(new THREE.HemisphereLight('#ffffff','#8a93a6',.8));
+const key=new THREE.SpotLight('#fff6e8',70,16,.9,.5,1.3);key.position.set(1.5,5,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.bias=-.0004;sc.add(key);
+const key2=new THREE.SpotLight('#ffffff',40,10,.6,.5,1.3);key2.position.set(6,4,3);key2.target.position.set(6,1.2,0);sc.add(key2,key2.target);
+const M=(c,ro=.55,me=0)=>new THREE.MeshStandardMaterial({color:c,roughness:ro,metalness:me});
+const mesh=(g,m,p=[0,0,0],rot=[0,0,0],parent=sc)=>{const o=new THREE.Mesh(g,m);o.position.set(...p);o.rotation.set(...rot);o.castShadow=o.receiveShadow=true;parent.add(o);return o};
+mesh(new THREE.PlaneGeometry(30,20),M('#c9b59a',.8),[0,0,0],[-Math.PI/2,0,0]);
+mesh(new THREE.PlaneGeometry(30,10),M('#eef2f6',.9),[0,5,-2.5]);
+// ---------- 인물 (엘리베이터 스타일, 민머리) ----------
+const skin=M('#f1c7a0',.6);
+function person(col,x){
+  const g=new THREE.Group();g.position.set(x,0,0);sc.add(g);
+  const body=new THREE.Group();g.add(body);   // 넘어지기용 피벗(발)
+  mesh(new THREE.CapsuleGeometry(.24,.55,6,16),M(col,.6),[0,1.0,0],[0,0,0],body);
+  for(const s of[-1,1]) mesh(new THREE.CapsuleGeometry(.08,.5,4,10),M('#30384a',.7),[s*.1,.38,0],[0,0,0],body);
+  const head=new THREE.Group();head.position.set(0,1.68,0);body.add(head);
+  mesh(new THREE.SphereGeometry(.22,32,32),skin,[0,0,0],[0,0,0],head);
+  const f={};
+  f.eyes=[-1,1].map(s=>mesh(new THREE.SphereGeometry(.028,12,12),M('#111',.3),[s*.075,.03,.2],[0,0,0],head));
+  f.brows=[-1,1].map(s=>mesh(new THREE.BoxGeometry(.075,.016,.016),M('#2a1a10',.6),[s*.075,.1,.205],[0,0,0],head));
+  f.mouth=mesh(new THREE.TorusGeometry(.04,.011,8,20,Math.PI),M('#7a2f22',.5),[0,-.075,.205],[0,0,Math.PI],head);
+  f.mouthO=mesh(new THREE.SphereGeometry(.035,16,16),M('#5a1f18',.5),[0,-.08,.2],[0,0,0],head);f.mouthO.scale.set(1,1.3,.5);
+  const arms=[-1,1].map(s=>{const a=new THREE.Group();a.position.set(s*.28,1.22,0);body.add(a);mesh(new THREE.CapsuleGeometry(.065,.42,4,10),M(col,.6),[0,-.25,0],[0,0,0],a);return a});
+  return {g,body,head,f,arms};
+}
+function expr(p,e,talk){
+  const f=p.f;f.mouth.visible=true;f.mouthO.visible=false;f.mouth.rotation.z=Math.PI;f.mouth.scale.set(1,1,1);f.mouth.position.y=-.075;
+  f.eyes.forEach(o=>o.scale.set(1,1,1));
+  const B=(tilt,y)=>f.brows.forEach((b,i)=>{const s=i?1:-1;b.rotation.z=s*tilt;b.position.y=y});
+  B(0,.1);
+  if(e==='smug'){B(-.25,.11);f.mouth.scale.set(1.3,.8,1)}
+  if(e==='shock'){B(0,.135);f.eyes.forEach(o=>o.scale.set(1.6,1.6,1.6));f.mouth.visible=false;f.mouthO.visible=true}
+  if(e==='angry'){B(.45,.09);f.mouth.rotation.z=0;f.mouth.position.y=-.09}
+  if(e==='flat'){B(.12,.095);f.mouth.scale.set(1.1,.25,1)}
+  if(talk&&e!=='shock'){f.mouth.visible=false;f.mouthO.visible=true;f.mouthO.scale.set(.75,.35+talk*.7,.45)}
+  else f.mouthO.scale.set(1,1.3,.5);
+}
+const heo=person('#ff8a3d',-.36), ddok=person('#4f7dff',.36);
+// 허당 손의 볼펜(뚜껑 포함)
+const pen=new THREE.Group();mesh(new THREE.CylinderGeometry(.018,.018,.3,16),M('#f4f4f4',.4),[0,0,0],[0,0,0],pen);
+const penCap=new THREE.Group();pen.add(penCap);penCap.position.y=.13;
+mesh(new THREE.CylinderGeometry(.022,.022,.09,16),M('#2f6df0',.4),[0,0,0],[0,0,0],penCap);
+pen.position.set(0,-.48,.05);heo.arms[1].add(pen);
+// 머리 위 뚜껑(아재개그용)
+const headCap=new THREE.Group();mesh(new THREE.CylinderGeometry(.09,.11,.16,24),M('#2f6df0',.4),[0,0,0],[0,0,0],headCap);mesh(new THREE.TorusGeometry(.03,.012,8,20),M('#163a8a',.4),[0,.085,0],[Math.PI/2,0,0],headCap);
+headCap.position.set(0,.26,0);heo.head.add(headCap);
+// ---------- 큰 뚜껑 (접사 컷용, x=6) ----------
+const big=new THREE.Group();big.position.set(6,1.2,0);sc.add(big);
+const capRoot=new THREE.Group();big.add(capRoot);           // 뚜껑 꼭대기가 원점 근처, 아래로 펜이 이어짐
+const clear=new THREE.MeshPhysicalMaterial({color:'#eef6ff',roughness:.08,transmission:.85,thickness:.15,ior:1.45});
+const capM=new THREE.MeshPhysicalMaterial({color:'#1f5fe0',roughness:.25,clearcoat:.8,clearcoatRoughness:.2});
+// 펜 몸통(투명 육각) + 잉크심
+mesh(new THREE.CylinderGeometry(.1,.1,1.7,6),clear,[0,-1.25,0],[0,0,0],capRoot);
+mesh(new THREE.CylinderGeometry(.025,.025,1.65,16),M('#1f5fe0',.4),[0,-1.25,0],[0,0,0],capRoot);
+// 뚜껑: 위로 갈수록 살짝 가늘어지는 원통 + 둥근 끝
+mesh(new THREE.CylinderGeometry(.095,.118,.62,40),capM,[0,-.08,0],[0,0,0],capRoot);
+const dome=mesh(new THREE.SphereGeometry(.095,40,20,0,Math.PI*2,0,Math.PI/2),capM,[0,.23,0],[0,0,0],capRoot);
+mesh(new THREE.TorusGeometry(.042,.011,10,30),capM,[0,.315,0],[Math.PI/2,0,0],capRoot);
+mesh(new THREE.CylinderGeometry(.04,.04,.02,24),M('#05070d',.9),[0,.312,0],[0,0,0],capRoot);   // 꼭대기 구멍
+// 클립: 꼭대기 근처에서 시작해 아래로 내려오는 얇은 막대 + 끝 방울
+mesh(new THREE.BoxGeometry(.045,.5,.022),capM,[0,-.05,.135],[ .04,0,0],capRoot);
+mesh(new THREE.BoxGeometry(.045,.06,.06),capM,[0,.2,.11],[0,0,0],capRoot);
+mesh(new THREE.SphereGeometry(.03,16,16),capM,[0,-.3,.125],[0,0,0],capRoot);
+capRoot.rotation.set(.5,0,-.45); capRoot.position.set(0,0,0);
+// 공기 화살표
+const arrows=[];for(let i=0;i<5;i++){const a=new THREE.Group();mesh(new THREE.CylinderGeometry(.018,.018,.22,10),M('#8fd3ff',.3),[0,0,0],[0,0,0],a);mesh(new THREE.ConeGeometry(.05,.1,14),M('#8fd3ff',.3),[0,.15,0],[0,0,0],a);capRoot.add(a);arrows.push(a)}
+// ---------- 유틸 ----------
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ease=x=>{x=clamp(x);return x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2}, outBack=x=>{x=clamp(x);const c=1.7;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const lerp=(a,b,k)=>a+(b-a)*k, V=(a,b,k)=>new THREE.Vector3(lerp(a[0],b[0],k),lerp(a[1],b[1],k),lerp(a[2],b[2],k));
+const HEO=new THREE.Vector3(-.36,1.68,0), DDOK=new THREE.Vector3(.36,1.68,0), BIG=new THREE.Vector3(6,1.25,0);
+let shake=0;
+const camTo=(p,l)=>{cam.position.copy(p);if(shake){cam.position.x+=Math.sin(T*90)*shake;cam.position.y+=Math.cos(T*77)*shake}cam.lookAt(l)};
+const stamp=(html,k,x,y,rot=0)=>k<=0?'':`<div style="position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${rot}deg) scale(${1.6-.6*outBack(k*2.5)});opacity:${clamp(k*5)}">${html}</div>`;
+const SFX=(t,fs,c='#ffd400')=>`<div class="sfx" style="font-size:${fs}px;color:${c}">${t}</div>`;
+let T=0;
+function reset(){
+  for(const p of[heo,ddok]){p.g.rotation.set(0,0,0);p.body.rotation.set(0,0,0);p.body.position.set(0,0,0);p.head.rotation.set(0,0,0);p.head.scale.set(1,1,1);
+    p.arms[0].rotation.set(0,0,-.25);p.arms[1].rotation.set(0,0,.25);}
+  heo.g.position.x=-.36;ddok.g.position.x=.36;heo.g.rotation.y=.35;ddok.g.rotation.y=-.35;
+  heo.arms[1].rotation.set(-1.0,0,.15);  // 볼펜 든 팔
+  headCap.visible=false;headCap.position.set(0,.26,0);headCap.rotation.set(0,0,0);penCap.visible=true;
+  arrows.forEach(a=>a.visible=false);big.rotation.y=0;shake=0;
+}
+// 장면: 대사 번호(i)별
+function shot(i,lt,L,talkH,talkD){
+  const k=lt/L;let html='';let eh='smile',ed='flat';
+  if(i===0){ // 큰 뚜껑 초접사, 천천히 회전 → 허당 질문
+    big.rotation.y=Math.sin(lt*.8)*.35;camTo(V([6.45,2.35,2.5],[6.35,2.2,2.1],ease(k)),new THREE.Vector3(6.05,1.2,0));
+  } else if(i===1){ // 허당 클로즈업, 으쓱
+    eh='smug';heo.head.rotation.z=Math.sin(lt*6)*.08;heo.arms[0].rotation.z=-.25-.5*Math.sin(clamp(lt*2)*Math.PI);
+    camTo(V([.15,1.8,2.1],[.05,1.78,1.8],ease(k)),new THREE.Vector3(-.36,1.45,0));
+  } else if(i===2){ // 땡 + 머리 딱
+    ed='angry';const hitK=clamp((lt-.05)/.3);
+    ddok.g.position.x=lerp(.36,.16,ease(hitK*2));
+    ddok.arms[0].rotation.z=-.25-2.7*Math.sin(clamp(hitK)*Math.PI*.95);
+    const hit=lt>.28&&lt<.9; if(hit){heo.head.scale.set(1.12,.82,1.12);heo.head.position.y=1.63}else heo.head.position.y=1.68;
+    eh=lt>.28?'shock':'smug';
+    shake=lt>.28&&lt<.7?.03:0;
+    document.getElementById('flash').style.opacity=lt>.28&&lt<.45?.35:0;
+    camTo(V([.1,1.65,3.8],[.05,1.62,3.0],ease(clamp(lt/.3))),new THREE.Vector3(0,1.3,0));
+    html=stamp(SFX('땡!',200),(lt-.28)/.3,560,640,10)+stamp(SFX('딱!',120,'#fff'),(lt-.3)/.3,300,760,-12);
+  } else if(i===3){ // 리액션: 머리 문지르기
+    eh='shock';heo.arms[0].rotation.set(0,0,-2.6+Math.sin(lt*18)*.25);heo.head.rotation.z=Math.sin(lt*10)*.05;
+    camTo(V([.1,1.75,1.8],[.05,1.74,1.6],ease(k)),new THREE.Vector3(-.36,1.5,0));
+    html=stamp(SFX('띠용~',130,'#ff8a3d'),(lt-.05)/.3,700,700,8);
+  } else if(i===4){ // 큰 뚜껑 + 공기 화살표
+    big.rotation.y=.2+Math.sin(lt*.6)*.2;arrows.forEach((a,j)=>{a.visible=true;const ph=(lt*.9+j/5)%1;a.position.set(Math.sin(j*2.1)*.015,-.05+ph*.75,0);a.scale.setScalar(.55+.3*Math.sin(ph*Math.PI))});
+    camTo(V([6.5,2.3,2.0],[6.4,2.2,1.75],ease(k)),new THREE.Vector3(6.08,1.28,0));
+  } else if(i===5){ // 허당 머리 빙글
+    eh='shock';heo.head.rotation.y=ease(clamp((lt-.3)/1.0))*Math.PI*2;
+    camTo(V([.15,1.75,2.1],[.1,1.74,1.8],ease(k)),new THREE.Vector3(-.36,1.45,0));
+  } else if(i===6){ // 정보 카드
+    big.rotation.y=Math.sin(lt*.5)*.3;camTo(new THREE.Vector3(6.4,2.2,3.0),new THREE.Vector3(6.05,1.05,0));
+    html=stamp(`<div class="card" style="position:static;width:760px"><div class="a">국제 표준 ISO 11540</div><div class="b">삼켜도 <span>1분에 8L 이상</span><br>공기가 지나가게</div></div>`,(lt-.15)/.4,500,1010,-2);
+  } else if(i===7){ // 투샷: 허당이 볼펜을 입으로 → 똑순이 지적
+    eh='smile';ed='angry';heo.arms[1].rotation.set(-1.0-1.2*ease(clamp(lt/.8)),0,.15+.35*ease(clamp(lt/.8)));
+    camTo(V([0,1.55,4.2],[0,1.55,3.7],ease(k)),new THREE.Vector3(0,1.2,0));
+    html=stamp(SFX('냠냠',90,'#fff'),(lt-.7)/.3,330,760,-8);
+  } else if(i===8){ // 아재개그: 머리 뚜껑 열림
+    eh='smug';headCap.visible=true;penCap.visible=false;
+    const pop=clamp((lt-1.3)/.6);headCap.position.y=.26+outBack(pop)*.45;headCap.rotation.z=pop*2.5;
+    camTo(V([.15,1.95,2.4],[.1,1.95,2.2],ease(k)),new THREE.Vector3(-.36,1.55,0));
+    html=stamp(SFX('뻥!',120,'#fff'),(lt-1.3)/.3,420,560,-10);
+  } else if(i===9){ // 똑순이 무표정 → 허당 뒤로 픽
+    ed='flat';eh='shock';headCap.visible=false;penCap.visible=false;
+    const fall=clamp((lt-1.4)/.5);heo.body.rotation.x=-ease(fall)*1.45;
+    if(lt<1.4) camTo(V([-.1,1.8,2.1],[-.05,1.78,1.8],ease(k*2)),new THREE.Vector3(.36,1.45,0));
+    else camTo(new THREE.Vector3(0,1.4,5.0),new THREE.Vector3(-.1,.95,0));
+    html=lt>1.4?stamp(SFX('픽',110,'#fff'),(lt-1.6)/.3,330,980,-15):'';
+  } else if(i===10){ // 허당 벌떡 + 가보자고
+    eh='smile';const up=clamp(lt/.5);heo.body.rotation.x=-1.45*(1-outBack(up));heo.body.position.y=Math.sin(clamp(lt/.6)*Math.PI)*.15;
+    heo.arms[0].rotation.z=-2.7;heo.arms[1].rotation.set(0,0,2.7);
+    camTo(V([0,1.45,4.8],[0,1.45,4.4],ease(k)),new THREE.Vector3(0,1.05,0));
+  } else { // 엔딩: 좋아요·공유
+    eh='smile';ed='smile';heo.arms[0].rotation.z=-2.7;ddok.arms[1].rotation.z=2.2+Math.sin(lt*8)*.3;
+    camTo(new THREE.Vector3(0,1.45,4.6),new THREE.Vector3(0,1.0,0));
+    const liked=lt>.5;
+    html=stamp(`<div style="width:220px;height:220px;border-radius:50%;background:${liked?'#ff3b3b':'#fff'};border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="120" height="120" viewBox="0 0 24 24"><path fill="${liked?'#fff':'#111'}" d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6c-.4.4-.6.9-.6 1.4V19a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z"/></svg></div>`,lt/.3,300,620,-6)
+      +stamp(`<div style="width:200px;height:200px;border-radius:50%;background:#25c26e;border:9px solid #111;display:flex;align-items:center;justify-content:center"><svg width="110" height="110" viewBox="0 0 24 24"><path fill="#fff" d="M14 5v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7-7-7z"/></svg></div>`,(lt-1.2)/.3,720,620,6);
+  }
+  expr(heo,eh,talkH);expr(ddok,ed,talkD);
+  return html;
+}
+let CAPS=null;
+window.renderFrame=(t,TL)=>{
+  T=t;reset();document.getElementById('flash').style.opacity=0;
+  const Ls=TL.lines;let cur=Ls.findIndex((l,j)=>t<(Ls[j+1]?Ls[j+1].start:TL.T));if(cur<0)cur=Ls.length-1;
+  const l=Ls[cur], L=(Ls[cur+1]?Ls[cur+1].start:TL.T)-l.start, lt=Math.max(0,t-l.start);
+  // 말하는 입: 단어 안이면 열고 닫기
+  let talk=0;for(const w of l.words) if(t>=w.start&&t<=w.end) talk=.5+.5*Math.sin(t*38);
+  const html=shot(l.i===99?11:l.i,lt,L,l.who==='허당'?talk:0,l.who==='똑순이'?talk:0);
+  r.render(sc,cam);
+  // 자막: 지금(또는 직전) 대사 한 줄
+  let cl=null;for(const x of Ls) if(x.cap&&t>=x.start-.05) cl=x;
+  if(cl&&t>(Ls[Ls.indexOf(cl)+1]||{start:1e9}).start+.6&&Ls[Ls.indexOf(cl)+1].who==='-'){}
+  const capHtml=cl?`<div class="cap"><span class="who" style="background:${cl.who==='허당'?'#ff8a3d':'#4f7dff'}">${cl.who}</span><br>${cl.cap}</div>`:'';
+  document.getElementById('ov').innerHTML=html+capHtml;
+};
+window.ready=true;
+</script></body></html>

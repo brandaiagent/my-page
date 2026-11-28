@@ -1,0 +1,97 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&family=Black+Han+Sans&display=block" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;background:#000;font-family:'Noto Sans KR';word-break:keep-all}
+#view{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#ov{position:absolute;inset:0;pointer-events:none}
+.bub{position:absolute;background:#fff;border:7px solid #111;border-radius:46px;padding:26px 40px;font-weight:900;font-size:62px;line-height:1.25;color:#111;letter-spacing:-2px;box-shadow:8px 10px 0 rgba(0,0,0,.25)}
+.bub:after{content:"";position:absolute;width:44px;height:44px;background:#fff;border-right:7px solid #111;border-bottom:7px solid #111}
+.bub.dl:after{left:70px;bottom:-29px;transform:rotate(45deg)}
+.bub.dr:after{right:70px;bottom:-29px;transform:rotate(45deg)}
+.bub b{color:#e0262b}
+.name{display:block;font-size:34px;color:#7a7a7a;margin-bottom:4px;letter-spacing:-1px}
+.sfx{position:absolute;font-family:'Black Han Sans';color:#ffd400;-webkit-text-stroke:16px #111;paint-order:stroke fill;letter-spacing:-2px}
+.tag{position:absolute;left:60px;top:250px;background:#ffd400;border:6px solid #111;border-radius:22px;padding:10px 26px;font-family:'Black Han Sans';font-size:56px;color:#111;transform:rotate(-2deg)}
+.inner{position:absolute;font-weight:700;font-size:40px;color:#fff;-webkit-text-stroke:8px #111;paint-order:stroke fill}
+.safe{position:absolute;border:4px dashed rgba(255,0,0,.8)}
+</style>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+</head><body>
+<canvas id="view" width="1080" height="1920"></canvas><div id="ov"></div>
+<script type="module">
+import * as THREE from 'three';
+const cv=document.getElementById('view');
+const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+r.setSize(1080,1920,false);r.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(30,1080/1920,.1,50);
+// 툰 셰이딩: 3단 그라데이션
+const gt=new THREE.DataTexture(new Uint8Array([90,90,90,255,180,180,180,255,255,255,255,255]),3,1,THREE.RGBAFormat);gt.needsUpdate=true;gt.magFilter=gt.minFilter=THREE.NearestFilter;
+const T=c=>new THREE.MeshToonMaterial({color:c,gradientMap:gt});
+const OUT=new THREE.MeshBasicMaterial({color:'#111',side:THREE.BackSide});
+sc.add(new THREE.AmbientLight('#fff',1.4));const dl=new THREE.DirectionalLight('#fff',2.2);dl.position.set(2,4,5);sc.add(dl);
+// 외곽선(뒷면 확대) 포함 메시
+const toon=(g,c,p=[0,0,0],s=[1,1,1],rot=[0,0,0],parent=sc,ow=.035)=>{const grp=new THREE.Group();
+  const m=new THREE.Mesh(g,T(c));const o=new THREE.Mesh(g,OUT);
+  g.computeBoundingSphere();const k=1+ow/g.boundingSphere.radius;o.scale.set(k,k,k);
+  grp.add(o,m);grp.position.set(...p);grp.scale.set(...s);grp.rotation.set(...rot);parent.add(grp);return grp};
+const S=(r,w=32)=>new THREE.SphereGeometry(r,w,w);
+// 배경: 방 벽 + 책상
+const wall=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshBasicMaterial({color:'#bfe3ff'}));wall.position.set(0,2,-3);sc.add(wall);
+for(let i=-6;i<=6;i++){const d=new THREE.Mesh(new THREE.CircleGeometry(.09,20),new THREE.MeshBasicMaterial({color:'#a6d6fb'}));d.position.set(i*.7+(i%2?.35:0),(i%3)*.8+1,-2.99);sc.add(d)}
+toon(new THREE.BoxGeometry(6,.25,1.6),'#e0a96d',[0,-.15,.2]);
+// 캐릭터 공통
+function char({skin='#ffd9b8',hoodie,hair,hairStyle,glasses=false,x,face}){
+  const g=new THREE.Group();g.position.x=x;sc.add(g);
+  toon(new THREE.CapsuleGeometry(.42,.35,8,24),hoodie,[0,.45,0],[1,1,1],[0,0,0],g);          // 몸
+  toon(S(.62),skin,[0,1.45,0],[1,.95,1],[0,0,0],g);                                         // 머리
+  if(hairStyle==='none'){}
+  else if(hairStyle==='spiky'){toon(S(.64),hair,[0,1.62,-.06],[1.02,.75,1],[0,0,0],g);
+    for(let i=-2;i<=2;i++) toon(new THREE.ConeGeometry(.13,.32,10),hair,[i*.17,2.05,.12],[1,1,1],[.5,0,-i*.25],g,.02);}
+  else {toon(S(.66),hair,[0,1.55,-.08],[1.04,.9,1],[0,0,0],g);
+    toon(S(.3),hair,[.5,1.15,-.25],[1,1.3,1],[0,0,0],g);toon(S(.3),hair,[-.5,1.15,-.25],[1,1.3,1],[0,0,0],g);}
+  // 눈
+  const eye=(ex)=>{toon(S(.13),'#fff',[ex,1.48,.52],[1,1.15,.5],[0,0,0],g,.02);
+    const p=new THREE.Mesh(S(.075),new THREE.MeshBasicMaterial({color:'#111'}));p.position.set(ex+(face.look||0),1.46,.6);g.add(p);
+    const h=new THREE.Mesh(S(.025),new THREE.MeshBasicMaterial({color:'#fff'}));h.position.set(ex+.03+(face.look||0),1.5,.67);g.add(h);};
+  eye(-.22);eye(.22);
+  // 눈썹
+  for(const s of[-1,1]){const b=new THREE.Mesh(new THREE.BoxGeometry(.24,.07,.05),new THREE.MeshBasicMaterial({color:'#2a1a10'}));
+    b.position.set(s*.22,1.68+(face.brow||0),.55);b.rotation.z=s*(face.browTilt||0);g.add(b);}
+  // 입
+  const mouth=new THREE.Mesh(new THREE.TorusGeometry(.09,.022,8,20,Math.PI),new THREE.MeshBasicMaterial({color:'#5a2a1a'}));
+  mouth.position.set(0,1.22,.6);mouth.scale.set(face.smile?1.2:.8,face.smile?1.2:.8,1);mouth.rotation.z=face.smile?Math.PI:0;g.add(mouth);
+  // 볼터치
+  for(const s of[-1,1]){const c=new THREE.Mesh(new THREE.CircleGeometry(.07,16),new THREE.MeshBasicMaterial({color:'#ff9f9f',transparent:true,opacity:.7}));c.position.set(s*.38,1.33,.53);c.rotation.y=s*.5;g.add(c);}
+  if(glasses){for(const s of[-1,1]){const rim=new THREE.Mesh(new THREE.TorusGeometry(.16,.025,10,30),new THREE.MeshBasicMaterial({color:'#111'}));rim.position.set(s*.22,1.48,.63);g.add(rim);}
+    const br=new THREE.Mesh(new THREE.BoxGeometry(.13,.025,.025),new THREE.MeshBasicMaterial({color:'#111'}));br.position.set(0,1.5,.64);g.add(br);}
+  // 팔
+  toon(new THREE.CapsuleGeometry(.11,.35,6,12),hoodie,[-.5,.55,.1],[1,1,1],[0,0,.5],g);
+  toon(new THREE.CapsuleGeometry(.11,.35,6,12),hoodie,[.5,.55,.1],[1,1,1],[0,0,-.5],g);
+  return g;}
+const params=new URLSearchParams(location.search);
+const mode=params.get('m')||'frame';
+const heo=char({x:-.72,hoodie:'#ff8a3d',hair:'#3a2618',hairStyle:'none',face:{smile:true,brow:.06,browTilt:-.25,look:.04}});
+const ddok=char({x:.72,hoodie:'#5b7cff',hair:'#1c1c2a',hairStyle:'none',glasses:true,face:{smile:false,brow:-.04,browTilt:.35,look:-.05}});
+heo.rotation.y=.25;ddok.rotation.y=-.25;
+// 볼펜(허당 손)
+const pen=new THREE.Group();toon(new THREE.CylinderGeometry(.05,.05,.7,16),'#fff',[0,0,0],[1,1,1],[0,0,0],pen,.015);toon(new THREE.CylinderGeometry(.058,.058,.22,16),'#2f6df0',[0,.3,0],[1,1,1],[0,0,0],pen,.015);
+pen.position.set(-.55,.75,.55);pen.rotation.z=-.35;heo.add(pen);
+const ov=document.getElementById('ov');
+if(mode==='sheet'){ // 캐릭터 소개
+  cam.position.set(0,1.25,10.5);cam.lookAt(0,1.05,0);
+  ov.innerHTML=`<div class="tag" style="left:50%;transform:translateX(-50%) rotate(-2deg);top:180px">캐릭터 소개</div>
+  <div class="bub dl" style="left:60px;top:1330px;width:440px"><span class="name">허당</span>아는 척 대장<br><b>목소리: 필재</b></div>
+  <div class="bub dr" style="right:60px;top:1330px;width:440px"><span class="name">똑순이</span>팩트 폭격기<br><b>목소리: 나윤</b></div>`;
+} else { // 템플릿 예시 컷
+  cam.position.set(-.12,1.5,10.2);cam.lookAt(-.12,1.75,0);
+  ov.innerHTML=`<div class="tag">볼펜 뚜껑 구멍, 진짜 이유?</div>
+  <div class="bub dl" style="left:50px;top:360px;max-width:640px"><span class="name">허당</span>잉크 마르지 말라고~ ㅋ</div>
+  <div class="sfx" style="left:620px;top:600px;font-size:170px;transform:rotate(12deg)">땡!</div>
+  <div class="bub dr" style="right:160px;top:820px;max-width:520px;transform:scale(.92);transform-origin:right top"><span class="name">똑순이</span>개소리.<br>애들 삼키면 <b>숨 쉬라고</b></div>
+  <div class="inner" style="left:60px;top:1390px">(30년 씹어 옴 ㅅㅂ)</div>`
+  + (params.get('safe')?`<div class="safe" style="left:0;top:0;width:1080px;height:230px;background:rgba(255,0,0,.15)"></div><div class="safe" style="left:0;top:1470px;width:1080px;height:450px;background:rgba(255,0,0,.15)"></div><div class="safe" style="left:930px;top:230px;width:150px;height:1240px;background:rgba(255,0,0,.15)"></div>`:'');
+}
+r.render(sc,cam);window.ready=true;
+</script></body></html>
