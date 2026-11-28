@@ -26,7 +26,19 @@ subprocess.run(['rm','-rf',f"{W}/frames"]); subprocess.run(['node',f"{HERE}/kine
 NARR = any(sc.get('say') for sc in SP['scenes'])
 if NARR:
     subprocess.run(['python3',f"{HERE}/narration.py",'tts',spec_path,W],check=True)
-AUDIO_IN = ['-i',f"{W}/narration.m4a"] if NARR else ['-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo']
+# 배경음악: spec 에 "bgm": "upbeat|calm|curious|urgent" 가 있으면 직접 합성한 음악을 깔고, 나레이션이 나올 때 음악을 낮춘다(덕킹)
+BGM = SP.get('bgm')
+if BGM:
+    subprocess.run(['python3',f"{HERE}/bgm.py",BGM,str(T),f"{W}/bgm.wav",os.path.basename(spec_path)],check=True)
+    if NARR:
+        subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-i',f"{W}/narration.m4a",'-filter_complex',
+            "[0:a]loudnorm=I=-26:TP=-3,aresample=44100[m];[1:a]aresample=44100,asplit=2[v][sc];[m][sc]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=300[md];[md][v]amix=inputs=2:normalize=0,alimiter=limit=0.89[out]",
+            '-map','[out]','-ac','2','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
+    else:
+        subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bgm.wav",'-af','loudnorm=I=-16:TP=-1.5','-c:a','aac','-b:a','160k',f"{W}/mix.m4a"],check=True)
+    AUDIO_IN = ['-i',f"{W}/mix.m4a"]
+else:
+    AUDIO_IN = ['-i',f"{W}/narration.m4a"] if NARR else ['-f','lavfi','-t',str(T),'-i','anullsrc=r=44100:cl=stereo']
 subprocess.run(['ffmpeg','-y','-v','error','-i',f"{W}/bg.mp4",'-framerate','30','-i',f"{W}/frames/f%04d.png",'-f','lavfi','-t',str(T),'-i','color=c=0xffe033:s=1080x12:r=30',*AUDIO_IN,
   '-filter_complex',f"[0:v][1:v]overlay=0:0:shortest=1[a];[a]drawbox=x=0:y=70:w=1080:h=12:color=white@0.25:t=fill[b];[b][2:v]overlay=x='-1080+1080*t/{T}':y=70[v]",
   '-map','[v]','-map','3:a','-t',str(T),'-c:v','libx264','-preset','medium','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-movflags','+faststart',out],check=True)
